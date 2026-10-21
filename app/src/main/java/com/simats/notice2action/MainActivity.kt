@@ -101,12 +101,13 @@ class MainActivity : ComponentActivity() {
                         AppScreen.DOCUMENT_PREVIEW -> {
                             DocumentPreviewScreen(
                                 onBackClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
-                                onContinue = { currentScreen = AppScreen.FINDING_STEPS }
+                                onContinue = { currentScreen = AppScreen.NOTICE_DETAILS }
                             )
                         }
-                        AppScreen.FINDING_STEPS -> {
-                            FindingStepsScreen(
-                                onCancel = { currentScreen = AppScreen.MAIN }
+                        AppScreen.NOTICE_DETAILS -> {
+                            NoticeDetailsScreen(
+                                onBackClicked = { currentScreen = AppScreen.DOCUMENT_PREVIEW },
+                                onGenerateActions = { currentScreen = AppScreen.MAIN }
                             )
                         }
                         AppScreen.NAVIGATION_DRAWER -> {
@@ -132,7 +133,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, FINDING_STEPS, NAVIGATION_DRAWER
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, NAVIGATION_DRAWER
 }
 
 @Composable
@@ -2778,14 +2779,10 @@ fun DocumentPreviewScreen(
 }
 
 @Composable
-fun FindingStepsScreen(
-    onCancel: () -> Unit
+fun NoticeDetailsScreen(
+    onBackClicked: () -> Unit,
+    onGenerateActions: () -> Unit
 ) {
-    LaunchedEffect(Unit) {
-        delay(3500L)
-        onCancel()
-    }
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF8FAFC)
@@ -2795,14 +2792,13 @@ fun FindingStepsScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(24.dp),
+                .padding(20.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .verticalScroll(rememberScrollState())
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -2814,7 +2810,7 @@ fun FindingStepsScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .background(Color(0xFFEEF2FF), CircleShape)
-                                .clickable { onCancel() },
+                                .clickable { onBackClicked() },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "←", fontSize = 18.sp, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
@@ -2830,7 +2826,7 @@ fun FindingStepsScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Finding your next steps",
+                                text = "Notice details",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF0F172A)
@@ -2841,78 +2837,84 @@ fun FindingStepsScreen(
                     Text(text = "•••", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4F46E5), letterSpacing = 2.sp)
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 Box(
-                    modifier = Modifier.size(160.dp),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier
+                        .background(Color(0xFFEEF2FF), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val strokeWidth = 14f
-                        drawCircle(
-                            color = Color(0xFFE2E8F0),
-                            radius = (size.minDimension - strokeWidth) / 2f,
-                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                        )
-                        drawArc(
-                            color = Color(0xFF2563EB),
-                            startAngle = -90f,
-                            sweepAngle = 252f,
-                            useCenter = false,
-                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                        )
-                    }
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "70%",
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF0F172A)
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Illustrative progress",
-                            fontSize = 11.sp,
-                            color = Color(0xFF64748B)
-                        )
-                    }
+                    Text(
+                        text = "COLLEGE • EXTRACTION PREVIEW",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4F46E5)
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "One notice. A clearer plan.",
-                    fontSize = 22.sp,
+                    text = "Innovation Week 2026",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF0F172A)
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "innovation-week-2026.pdf",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF64748B)
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = "We'll ask you to verify every extracted date.",
-                    fontSize = 12.sp,
-                    color = Color(0xFF94A3B8)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(2.dp, RoundedCornerShape(20.dp))
-                        .background(Color.White, RoundedCornerShape(20.dp))
-                        .padding(20.dp)
+                        .shadow(2.dp, RoundedCornerShape(16.dp))
+                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = "Summary",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Submit a proposal, attend a team briefing and prepare for final presentations.",
+                            fontSize = 13.sp,
+                            color = Color(0xFF475569),
+                            lineHeight = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "📄", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Source preview • PDF • Page 1 of 2",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF2563EB)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Identified dates & deadlines",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(16.dp))
+                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .padding(16.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Row(
@@ -2920,113 +2922,102 @@ fun FindingStepsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .background(Color(0xFFDCFCE7), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "✓", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF16A34A))
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
+                            Column {
                                 Text(
-                                    text = "Uploading",
-                                    fontSize = 14.sp,
+                                    text = "Proposal submission",
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0F172A)
                                 )
-                            }
-                            Text(
-                                text = "Done",
-                                fontSize = 12.sp,
-                                color = Color(0xFF64748B)
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .background(Color(0xFFDCFCE7), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "✓", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF16A34A))
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "Extracting Text",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF0F172A)
-                                )
-                            }
-                            Text(
-                                text = "Done",
-                                fontSize = 12.sp,
-                                color = Color(0xFF64748B)
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .background(Color(0xFFEEF2FF), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "⟳", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = "Identifying Actions",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF0F172A)
-                                )
-                            }
-                            Text(
-                                text = "In progress",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF2563EB)
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .background(Color(0xFFF1F5F9), CircleShape)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = "Detecting Deadlines",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    text = "20 Oct 2026 • 5:00 PM",
+                                    fontSize = 12.sp,
                                     color = Color(0xFF64748B)
                                 )
                             }
-                            Text(
-                                text = "Waiting",
-                                fontSize = 12.sp,
-                                color = Color(0xFF94A3B8)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFDCFCE7), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "High confidence",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF16A34A)
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Team briefing",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "22 Oct 2026 • 10:00 AM",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFDCFCE7), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "High confidence",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF16A34A)
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Final presentations",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "24 Oct 2026 • 2:00 PM*",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFFEF3C7), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Verify times",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFD97706)
+                                )
+                            }
                         }
                     }
                 }
@@ -3036,17 +3027,55 @@ fun FindingStepsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFEEF2FF), RoundedCornerShape(12.dp))
-                        .padding(12.dp)
+                        .background(Color(0xFFFEF3C7), RoundedCornerShape(16.dp))
+                        .padding(16.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "✨", fontSize = 14.sp)
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "⚠️", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Static loading concept. OCR and AI processing are not running.",
-                            fontSize = 11.sp,
-                            color = Color(0xFF4F46E5),
-                            fontWeight = FontWeight.Medium
+                            text = "Presentation time is provisional in the source. Verify with the coordinator before confirming.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF92400E),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(16.dp))
+                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Extracted text",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                            Text(
+                                text = "Expand",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2563EB)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "\"Submit your project proposal by 20 October 2026, 5:00 PM. Upload the proposal through the student portal...\"",
+                            fontSize = 12.sp,
+                            color = Color(0xFF64748B),
+                            lineHeight = 16.sp
                         )
                     }
                 }
@@ -3054,20 +3083,43 @@ fun FindingStepsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = { onCancel() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "Cancel",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2563EB)
-                )
+                OutlinedButton(
+                    onClick = { },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFFEEF2FF))
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "✎", fontSize = 15.sp, color = Color(0xFF2563EB))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Edit Details", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+                }
+
+                Button(
+                    onClick = { onGenerateActions() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "✦", fontSize = 15.sp, color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Generate Actions", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
             }
         }
     }
