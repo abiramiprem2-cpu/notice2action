@@ -65,7 +65,14 @@ class MainActivity : ComponentActivity() {
                         AppScreen.LOGIN -> {
                             LoginScreen(
                                 onLoginSuccess = { currentScreen = AppScreen.MAIN },
+                                onCreateAccountClicked = { currentScreen = AppScreen.CREATE_ACCOUNT },
                                 onBackClicked = { currentScreen = AppScreen.ONBOARDING_2 }
+                            )
+                        }
+                        AppScreen.CREATE_ACCOUNT -> {
+                            CreateAccountScreen(
+                                onCreateSuccess = { currentScreen = AppScreen.MAIN },
+                                onBackToLogin = { currentScreen = AppScreen.LOGIN }
                             )
                         }
                         AppScreen.MAIN -> {
@@ -83,7 +90,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, MAIN
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN
 }
 
 @Composable
@@ -802,6 +809,7 @@ fun OnboardingStep2Screen(
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onCreateAccountClicked: () -> Unit,
     onBackClicked: () -> Unit
 ) {
     var email by remember { mutableStateOf("maya.chen@northbridge.example") }
@@ -1008,7 +1016,7 @@ fun LoginScreen(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2563EB),
-                        modifier = Modifier.clickable { }
+                        modifier = Modifier.clickable { onCreateAccountClicked() }
                     )
                 }
 
@@ -1038,6 +1046,238 @@ fun LoginScreen(
 }
 
 @Composable
+fun CreateAccountScreen(
+    onCreateSuccess: () -> Unit,
+    onBackToLogin: () -> Unit
+) {
+    var fullName by remember { mutableStateOf("Maya Chen") }
+    var email by remember { mutableStateOf("maya.chen@northbridge.example") }
+    var password by remember { mutableStateOf("••••••••••••") }
+    var confirmPassword by remember { mutableStateOf("••••••••••••") }
+    var termsAgreed by remember { mutableStateOf(true) }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFFEEF2FF), CircleShape)
+                                .clickable { onBackToLogin() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "←", fontSize = 18.sp, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "A • WELCOME & AUTHENTICATION",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Create your account",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                        }
+                    }
+
+                    Text(text = "•••", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4F46E5), letterSpacing = 2.sp)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "A clearer plan starts here.",
+                    fontSize = 14.sp,
+                    color = Color(0xFF64748B)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "Full name", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF334155))
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = fullName,
+                    onValueChange = { fullName = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = { Text(text = "👤", fontSize = 16.sp) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF2563EB),
+                        unfocusedBorderColor = Color(0xFFE2E8F0),
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(text = "Email address", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF334155))
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = { Text(text = "✉", fontSize = 16.sp) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF2563EB),
+                        unfocusedBorderColor = Color(0xFFE2E8F0),
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(text = "Password", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF334155))
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = { Text(text = "👁", fontSize = 16.sp) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF2563EB),
+                        unfocusedBorderColor = Color(0xFFE2E8F0),
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
+                    )
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Use 8+ characters with a number and a symbol.",
+                    fontSize = 11.sp,
+                    color = Color(0xFF94A3B8)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(text = "Confirm password", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF334155))
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = { Text(text = "👁", fontSize = 16.sp) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF2563EB),
+                        unfocusedBorderColor = Color(0xFFE2E8F0),
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = termsAgreed,
+                        onCheckedChange = { termsAgreed = it },
+                        colors = CheckboxDefaults.colors(checkedColor = Color(0xFF2563EB))
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "I agree to the Terms of Service and Privacy Policy.",
+                        fontSize = 12.sp,
+                        color = Color(0xFF475569)
+                    )
+                }
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Button(
+                    onClick = { onCreateSuccess() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "→", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Create Account", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Already have an account? ", fontSize = 13.sp, color = Color(0xFF64748B))
+                    Text(
+                        text = "Login",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2563EB),
+                        modifier = Modifier.clickable { onBackToLogin() }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFEEF2FF), RoundedCornerShape(12.dp))
+                        .padding(10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🛡️", fontSize = 12.sp)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Fictional college demo. Account creation is not connected.",
+                            fontSize = 11.sp,
+                            color = Color(0xFF4F46E5),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun Greeting(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
@@ -1054,8 +1294,8 @@ fun Greeting(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+fun CreateAccountPreview() {
     Notice2actionTheme {
-        LoginScreen(onLoginSuccess = {}, onBackClicked = {})
+        CreateAccountScreen(onCreateSuccess = {}, onBackToLogin = {})
     }
 }
