@@ -17,6 +17,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -81,7 +82,8 @@ class MainActivity : ComponentActivity() {
                             DashboardScreen(
                                 onScanDocumentClicked = { currentScreen = AppScreen.SCAN_DOCUMENT },
                                 onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
-                                onProfileClicked = { currentScreen = AppScreen.SCAN_DOCUMENT }
+                                onProfileClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
+                                onMenuClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER }
                             )
                         }
                         AppScreen.SCAN_DOCUMENT -> {
@@ -107,6 +109,21 @@ class MainActivity : ComponentActivity() {
                                 onCancel = { currentScreen = AppScreen.MAIN }
                             )
                         }
+                        AppScreen.NAVIGATION_DRAWER -> {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                DashboardScreen(
+                                    onScanDocumentClicked = { currentScreen = AppScreen.SCAN_DOCUMENT },
+                                    onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
+                                    onProfileClicked = { },
+                                    onMenuClicked = { }
+                                )
+                                NavigationDrawerScreen(
+                                    onClose = { currentScreen = AppScreen.MAIN },
+                                    onHome = { currentScreen = AppScreen.MAIN },
+                                    onLogout = { currentScreen = AppScreen.LOGIN }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -115,7 +132,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, FINDING_STEPS
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, FINDING_STEPS, NAVIGATION_DRAWER
 }
 
 @Composable
@@ -1306,7 +1323,8 @@ fun CreateAccountScreen(
 fun DashboardScreen(
     onScanDocumentClicked: () -> Unit,
     onUploadDocumentClicked: () -> Unit,
-    onProfileClicked: () -> Unit
+    onProfileClicked: () -> Unit,
+    onMenuClicked: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -1346,7 +1364,12 @@ fun DashboardScreen(
                         )
                     }
 
-                    Text(text = "☰", fontSize = 22.sp, color = Color(0xFF2563EB))
+                    Text(
+                        text = "☰",
+                        fontSize = 22.sp,
+                        color = Color(0xFF2563EB),
+                        modifier = Modifier.clickable { onMenuClicked() }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -1719,6 +1742,190 @@ fun DashboardScreen(
                         Text(text = "👤", fontSize = 16.sp)
                         Text(text = "Profile", fontSize = 10.sp, color = Color(0xFF64748B))
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NavigationDrawerScreen(
+    onClose: () -> Unit,
+    onHome: () -> Unit,
+    onLogout: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.4f))
+            .clickable { onClose() },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(310.dp)
+                .clickable(enabled = false) { },
+            color = Color.White,
+            shadowElevation = 16.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "B • MAIN NAVIGATION",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF94A3B8),
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "✕",
+                            fontSize = 18.sp,
+                            color = Color(0xFF64748B),
+                            modifier = Modifier.clickable { onClose() }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .background(Color(0xFFDBEAFE), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "👩‍💼", fontSize = 26.sp)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Maya Chen",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "maya.chen@northbridge.example",
+                        fontSize = 12.sp,
+                        color = Color(0xFF64748B)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFEEF2FF), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Student • Group admin",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF4F46E5)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val menuItems = listOf(
+                        Triple("🏠", "Home", true),
+                        Triple("📄", "My Documents", false),
+                        Triple("📋", "My Tasks", false),
+                        Triple("🔔", "Reminders", false),
+                        Triple("📅", "Calendar", false),
+                        Triple("👥", "Groups", false),
+                        Triple("⚙️", "Settings", false),
+                        Triple("❓", "Help and Support", false)
+                    )
+
+                    menuItems.forEach { (icon, title, isSelected) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) Color(0xFFEEF2FF) else Color.Transparent)
+                                .clickable {
+                                    if (title == "Home") onHome()
+                                    else onClose()
+                                }
+                                .padding(horizontal = 12.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = icon, fontSize = 18.sp)
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Text(
+                                text = title,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color(0xFF2563EB) else Color(0xFF334155)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onLogout() }
+                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "🚪", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Text(
+                            text = "Logout",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFDC2626)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Column {
+                    Text(
+                        text = "Notice2Action",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Turn Documents Into Actions.",
+                        fontSize = 11.sp,
+                        color = Color(0xFF64748B)
+                    )
+                    Text(
+                        text = "Demo workspace • v1.0.0",
+                        fontSize = 10.sp,
+                        color = Color(0xFF94A3B8)
+                    )
                 }
             }
         }
@@ -2863,13 +3070,5 @@ fun FindingStepsScreen(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun FindingStepsPreview() {
-    Notice2actionTheme {
-        FindingStepsScreen(onCancel = {})
     }
 }
