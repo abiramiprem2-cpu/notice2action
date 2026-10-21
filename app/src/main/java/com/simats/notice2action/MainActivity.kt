@@ -93,6 +93,12 @@ class MainActivity : ComponentActivity() {
                         AppScreen.UPLOAD_DOCUMENT -> {
                             UploadDocumentScreen(
                                 onBackClicked = { currentScreen = AppScreen.MAIN },
+                                onContinue = { currentScreen = AppScreen.DOCUMENT_PREVIEW }
+                            )
+                        }
+                        AppScreen.DOCUMENT_PREVIEW -> {
+                            DocumentPreviewScreen(
+                                onBackClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
                                 onContinue = { currentScreen = AppScreen.MAIN }
                             )
                         }
@@ -104,7 +110,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW
 }
 
 @Composable
@@ -2270,10 +2276,299 @@ fun UploadDocumentScreen(
     }
 }
 
+@Composable
+fun DocumentPreviewScreen(
+    onBackClicked: () -> Unit,
+    onContinue: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFFEEF2FF), CircleShape)
+                                .clickable { onBackClicked() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "←", fontSize = 18.sp, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "C • DOCUMENT CAPTURE & PROCESSING",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Document Preview",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                        }
+                    }
+
+                    Text(text = "•••", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4F46E5), letterSpacing = 2.sp)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFEEF2FF), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "PDF • 2 PAGES",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4F46E5)
+                        )
+                    }
+                    Text(
+                        text = "innovation-week-2026.pdf",
+                        fontSize = 12.sp,
+                        color = Color(0xFF64748B)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp))
+                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .padding(18.dp)
+                ) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(Color(0xFF1E293B), RoundedCornerShape(6.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "🎓", fontSize = 12.sp)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(text = "NORTHRIDGE COLLEGE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                Text(text = "Office of Student Innovation", fontSize = 9.sp, color = Color(0xFF64748B))
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "INNOVATION WEEK 2026",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "NOTICE • 15 OCTOBER 2026 • REF: SV/26/104",
+                            fontSize = 9.sp,
+                            color = Color(0xFF64748B)
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "All student teams are invited to present a solution that makes everyday life better.",
+                            fontSize = 10.sp,
+                            color = Color(0xFF334155),
+                            lineHeight = 15.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Submit your project proposal by 20 October 2026, 5:00 PM.",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = "Upload the proposal through the student portal. Include the abstract and team member details.",
+                            fontSize = 10.sp,
+                            color = Color(0xFF64748B),
+                            lineHeight = 14.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Attend the briefing on 22 October, 10:00 AM, Innovation Lab B.",
+                            fontSize = 10.sp,
+                            color = Color(0xFF334155),
+                            lineHeight = 14.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = "Final presentations: 24 October, 2:00 PM*.",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "*Time subject to confirmation. Please contact the coordinator before making arrangements.",
+                            fontSize = 9.sp,
+                            color = Color(0xFF94A3B8),
+                            lineHeight = 13.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Dr. Elena Brooks • Innovation Coordinator",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF334155)
+                        )
+                        Text(
+                            text = "innovation@northbridge.example • Page 1 of 2",
+                            fontSize = 8.sp,
+                            color = Color(0xFF94A3B8)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "➖", fontSize = 14.sp, color = Color(0xFF64748B))
+                    Text(text = "100%", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                    Text(text = "➕", fontSize = 14.sp, color = Color(0xFF64748B))
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "〈", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                        Text(text = "1 / 2", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                        Text(text = "〉", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "📷", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(text = "Retake", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "🔄", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(text = "Rotate", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "✂️", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(text = "Crop", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "🗑️", fontSize = 20.sp, color = Color(0xFFDC2626))
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(text = "Remove", fontSize = 10.sp, color = Color(0xFFDC2626))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Check that the notice is legible before extraction.",
+                        fontSize = 11.sp,
+                        color = Color(0xFF64748B)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onContinue() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "→",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Continue",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-fun UploadDocumentPreview() {
+fun DocumentPreviewPreview() {
     Notice2actionTheme {
-        UploadDocumentScreen(onBackClicked = {}, onContinue = {})
+        DocumentPreviewScreen(onBackClicked = {}, onContinue = {})
     }
 }
