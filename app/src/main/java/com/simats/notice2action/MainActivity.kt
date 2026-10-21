@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.notice2action.ui.theme.Notice2actionTheme
@@ -107,7 +106,13 @@ class MainActivity : ComponentActivity() {
                         AppScreen.NOTICE_DETAILS -> {
                             NoticeDetailsScreen(
                                 onBackClicked = { currentScreen = AppScreen.DOCUMENT_PREVIEW },
-                                onGenerateActions = { currentScreen = AppScreen.MAIN }
+                                onGenerateActions = { currentScreen = AppScreen.UPCOMING_ACTIONS }
+                            )
+                        }
+                        AppScreen.UPCOMING_ACTIONS -> {
+                            UpcomingActionsScreen(
+                                onBackClicked = { currentScreen = AppScreen.NOTICE_DETAILS },
+                                onHomeClicked = { currentScreen = AppScreen.MAIN }
                             )
                         }
                         AppScreen.NAVIGATION_DRAWER -> {
@@ -133,7 +138,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, NAVIGATION_DRAWER
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER
 }
 
 @Composable
@@ -3119,6 +3124,334 @@ fun NoticeDetailsScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = "Generate Actions", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun UpcomingActionsScreen(
+    onBackClicked: () -> Unit,
+    onHomeClicked: () -> Unit
+) {
+    var selectedTab by remember { mutableStateOf("Later") }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFFEEF2FF), CircleShape)
+                                .clickable { onBackClicked() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "←", fontSize = 18.sp, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "E • DEADLINES & NOTIFICATIONS",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Upcoming Actions",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                        }
+                    }
+
+                    Text(text = "📅", fontSize = 20.sp)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val tabs = listOf("Today", "This Week", "Later")
+                    tabs.forEach { tab ->
+                        val isSelected = selectedTab == tab
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) Color.White else Color.Transparent)
+                                .clickable { selectedTab = tab }
+                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = tab,
+                                fontSize = 13.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color(0xFF0F172A) else Color(0xFF64748B)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFEEF2FF), RoundedCornerShape(14.dp))
+                        .padding(14.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "📅", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Today, 15 Oct: no deadlines. Your next action is in 5 days.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF1E3A8A),
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Next week",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Text(
+                        text = "Due date ↑",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2563EB)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TaskCard(
+                    dateNum = "20",
+                    dateMonth = "OCT",
+                    title = "Submit project proposal",
+                    timeAndLeft = "5:00 PM • 5 days left",
+                    source = "Innovation Week 2026",
+                    priorityText = "High",
+                    priorityBg = Color(0xFFFEE2E2),
+                    priorityColor = Color(0xFFDC2626)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TaskCard(
+                    dateNum = "22",
+                    dateMonth = "OCT",
+                    title = "Attend team briefing",
+                    timeAndLeft = "10:00 AM • 7 days left",
+                    source = "Innovation Week 2026",
+                    priorityText = "Medium",
+                    priorityBg = Color(0xFFFEF3C7),
+                    priorityColor = Color(0xFFD97706)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TaskCard(
+                    dateNum = "23",
+                    dateMonth = "OCT",
+                    title = "Submit expense report",
+                    timeAndLeft = "6:00 PM • 8 days left",
+                    source = "Personal workspace",
+                    priorityText = "Medium",
+                    priorityBg = Color(0xFFFEF3C7),
+                    priorityColor = Color(0xFFD97706)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Later in October",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TaskCard(
+                    dateNum = "25",
+                    dateMonth = "OCT",
+                    title = "Review fire safety notice",
+                    timeAndLeft = "12:00 PM • 10 days left",
+                    source = "Personal workspace",
+                    priorityText = "Low",
+                    priorityBg = Color(0xFFEEF2FF),
+                    priorityColor = Color(0xFF2563EB)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "28 Oct • Renew community library card • 1 more action",
+                    fontSize = 11.sp,
+                    color = Color(0xFF64748B)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskCard(
+    dateNum: String,
+    dateMonth: String,
+    title: String,
+    timeAndLeft: String,
+    source: String,
+    priorityText: String,
+    priorityBg: Color,
+    priorityColor: Color
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .padding(14.dp)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .background(Color(0xFFEEF2FF), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = dateNum,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2563EB),
+                                lineHeight = 16.sp
+                            )
+                            Text(
+                                text = dateMonth,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF4F46E5),
+                                lineHeight = 10.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = title,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = timeAndLeft,
+                            fontSize = 11.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .background(priorityBg, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = priorityText,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = priorityColor
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+            HorizontalDivider(color = Color(0xFFF1F5F9))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = source,
+                    fontSize = 11.sp,
+                    color = Color(0xFF64748B)
+                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Open Task",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2563EB)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "→",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2563EB)
+                    )
                 }
             }
         }
