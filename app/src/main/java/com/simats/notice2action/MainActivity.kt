@@ -73,13 +73,14 @@ class MainActivity : ComponentActivity() {
                         }
                         AppScreen.CREATE_ACCOUNT -> {
                             CreateAccountScreen(
-                                onCreateSuccess = { currentScreen = AppScreen.SCAN_DOCUMENT },
+                                onCreateSuccess = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
                                 onBackToLogin = { currentScreen = AppScreen.LOGIN }
                             )
                         }
                         AppScreen.MAIN -> {
                             DashboardScreen(
                                 onScanDocumentClicked = { currentScreen = AppScreen.SCAN_DOCUMENT },
+                                onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
                                 onProfileClicked = { currentScreen = AppScreen.SCAN_DOCUMENT }
                             )
                         }
@@ -87,6 +88,12 @@ class MainActivity : ComponentActivity() {
                             ScanDocumentScreen(
                                 onBackClicked = { currentScreen = AppScreen.MAIN },
                                 onUseDocument = { currentScreen = AppScreen.MAIN }
+                            )
+                        }
+                        AppScreen.UPLOAD_DOCUMENT -> {
+                            UploadDocumentScreen(
+                                onBackClicked = { currentScreen = AppScreen.MAIN },
+                                onContinue = { currentScreen = AppScreen.MAIN }
                             )
                         }
                     }
@@ -97,7 +104,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT
 }
 
 @Composable
@@ -1287,6 +1294,7 @@ fun CreateAccountScreen(
 @Composable
 fun DashboardScreen(
     onScanDocumentClicked: () -> Unit,
+    onUploadDocumentClicked: () -> Unit,
     onProfileClicked: () -> Unit
 ) {
     Surface(
@@ -1422,6 +1430,7 @@ fun DashboardScreen(
                             .height(90.dp)
                             .shadow(2.dp, RoundedCornerShape(16.dp))
                             .background(Color.White, RoundedCornerShape(16.dp))
+                            .clickable { onUploadDocumentClicked() }
                             .padding(16.dp),
                         contentAlignment = Alignment.BottomStart
                     ) {
@@ -1951,10 +1960,320 @@ fun ScanDocumentScreen(
     }
 }
 
+@Composable
+fun UploadDocumentScreen(
+    onBackClicked: () -> Unit,
+    onContinue: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFFEEF2FF), CircleShape)
+                                .clickable { onBackClicked() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "←", fontSize = 18.sp, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "C • DOCUMENT CAPTURE & PROCESSING",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Upload Document",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                        }
+                    }
+
+                    Text(text = "•••", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4F46E5), letterSpacing = 2.sp)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Bring a notice from your device.",
+                    fontSize = 14.sp,
+                    color = Color(0xFF64748B)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFEEF2FF), RoundedCornerShape(20.dp))
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "☁️", fontSize = 32.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Choose a document",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "PDF, JPG or PNG • Up to 20 MB",
+                            fontSize = 12.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "🖼️", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Gallery", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "📁", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Browse Files", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedButton(
+                    onClick = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🔗", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Import from Share", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(16.dp))
+                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = "📄", fontSize = 24.sp)
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = "innovation-week-2026.pdf",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF0F172A)
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "2.4 MB • Uploading • 72%",
+                                        fontSize = 11.sp,
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
+                            }
+
+                            Text(text = "✕", fontSize = 14.sp, color = Color(0xFF94A3B8), modifier = Modifier.clickable { })
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .background(Color(0xFFE2E8F0), RoundedCornerShape(2.dp))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.72f)
+                                    .height(4.dp)
+                                    .background(Color(0xFF2563EB), RoundedCornerShape(2.dp))
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Illustrative progress • No file transfer",
+                            fontSize = 10.sp,
+                            color = Color(0xFF94A3B8)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFFFF1F2), RoundedCornerShape(16.dp))
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "⚠️", fontSize = 16.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "campus-map.heic could not be added",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF991B1B)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "Unsupported format. Export as JPG or PNG.",
+                            fontSize = 12.sp,
+                            color = Color(0xFFB91C1C),
+                            modifier = Modifier.padding(start = 24.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(38.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                            ) {
+                                Text(text = "Choose another", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFDC2626))
+                            }
+
+                            OutlinedButton(
+                                onClick = { },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(38.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFFFECACA))
+                            ) {
+                                Text(text = "Remove", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFDC2626))
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onContinue() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "→",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Continue to Preview",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-fun ScanDocumentPreview() {
+fun UploadDocumentPreview() {
     Notice2actionTheme {
-        ScanDocumentScreen(onBackClicked = {}, onUseDocument = {})
+        UploadDocumentScreen(onBackClicked = {}, onContinue = {})
     }
 }
