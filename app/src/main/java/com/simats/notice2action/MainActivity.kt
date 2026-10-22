@@ -135,7 +135,8 @@ class MainActivity : ComponentActivity() {
                                     onClose = { currentScreen = AppScreen.MAIN },
                                     onHome = { currentScreen = AppScreen.MAIN },
                                     onLogout = { currentScreen = AppScreen.LOGIN },
-                                    onRemindersClicked = { currentScreen = AppScreen.REMINDERS }
+                                    onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
+                                    onCalendarClicked = { currentScreen = AppScreen.CALENDAR }
                                 )
                             }
                         }
@@ -177,6 +178,11 @@ class MainActivity : ComponentActivity() {
                                 onBackClicked = { currentScreen = AppScreen.PROFILE }
                             )
                         }
+                        AppScreen.CALENDAR -> {
+                            CalendarScreen(
+                                onBackClicked = { currentScreen = AppScreen.MAIN }
+                            )
+                        }
                     }
                 }
             }
@@ -185,7 +191,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS
 }
 
 @Composable
@@ -1809,7 +1815,8 @@ fun NavigationDrawerScreen(
     onClose: () -> Unit,
     onHome: () -> Unit,
     onLogout: () -> Unit,
-    onRemindersClicked: () -> Unit = {}
+    onRemindersClicked: () -> Unit = {},
+    onCalendarClicked: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -1925,6 +1932,7 @@ fun NavigationDrawerScreen(
                                     when (title) {
                                         "Home" -> onHome()
                                         "Reminders" -> onRemindersClicked()
+                                        "Calendar" -> onCalendarClicked()
                                         else -> onClose()
                                     }
                                 }
@@ -4995,6 +5003,318 @@ fun FaqItem(question: String, answer: String?, isExpanded: Boolean) {
                 color = Color(0xFF64748B),
                 lineHeight = 16.sp
             )
+        }
+    }
+}
+
+@Composable
+fun CalendarScreen(
+    onBackClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color(0xFFEEF2FF), RoundedCornerShape(12.dp))
+                        .clickable { onBackClicked() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "✨", fontSize = 18.sp, color = Color(0xFF3B82F6))
+                }
+                Text(
+                    text = "Calendar",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White, CircleShape)
+                        .shadow(1.dp, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "🔔", fontSize = 18.sp, color = Color(0xFF64748B))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Calendar Card
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shape = RoundedCornerShape(24.dp),
+                shadowElevation = 4.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(0xFFF1F5F9), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "‹", fontSize = 24.sp, color = Color(0xFF64748B))
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "June 2025",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1E293B)
+                            )
+                            Text(
+                                text = "3 upcoming items",
+                                fontSize = 12.sp,
+                                color = Color(0xFF94A3B8)
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(0xFFF1F5F9), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "›", fontSize = 24.sp, color = Color(0xFF64748B))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Days of week
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT").forEach { day ->
+                            Text(
+                                text = day,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Calendar Grid (Mock)
+                    val days = (1..30).toList()
+                    var dayIndex = 0
+                    for (row in 0..4) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            for (col in 0..6) {
+                                if (dayIndex < days.size) {
+                                    val day = days[dayIndex]
+                                    val isSelected = day == 24
+                                    val hasEvent = day == 25 || day == 28
+
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .background(
+                                                    if (isSelected) Color(0xFF3B82F6) else Color.Transparent,
+                                                    RoundedCornerShape(12.dp)
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = day.toString(),
+                                                fontSize = 14.sp,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isSelected) Color.White else Color(0xFF1E293B)
+                                            )
+                                        }
+                                        if (hasEvent || isSelected) {
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(4.dp)
+                                                    .background(
+                                                        if (isSelected) Color.White else Color(0xFFF97316),
+                                                        CircleShape
+                                                    )
+                                            )
+                                        } else {
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                        }
+                                    }
+                                    dayIndex++
+                                } else {
+                                    val nextMonthDay = dayIndex - days.size + 1
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.size(36.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = nextMonthDay.toString(),
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color(0xFFCBD5E1)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                    }
+                                    dayIndex++
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Selected Date Section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "SELECTED DATE",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF94A3B8),
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Tuesday, June 24",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E293B)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .background(Color(0xFFEEF2FF), RoundedCornerShape(8.dp))
+                        .clickable { }
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "+", fontSize = 16.sp, color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Add", fontSize = 14.sp, color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Events
+            Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                EventCard(
+                    time = "9:00\nAM",
+                    title = "Gather payment records",
+                    subtitle = "Rental payment notice",
+                    barColor = Color(0xFF3B82F6)
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                EventCard(
+                    time = "5:00\nPM",
+                    title = "Response reminder",
+                    subtitle = "Rental notice - Due in 4 days",
+                    barColor = Color(0xFFF97316)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EventCard(time: String, title: String, subtitle: String, barColor: Color) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = time,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF94A3B8),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(40.dp)
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(40.dp)
+                    .background(barColor, RoundedCornerShape(1.5.dp))
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B)
+                )
+            }
+            
+            Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
         }
     }
 }
