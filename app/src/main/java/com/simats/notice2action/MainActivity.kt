@@ -203,7 +203,13 @@ class MainActivity : ComponentActivity() {
                         }
                         AppScreen.DOCUMENT_DETAILS -> {
                             DocumentDetailsScreen(
-                                onBackClicked = { currentScreen = AppScreen.MY_DOCUMENTS }
+                                onBackClicked = { currentScreen = AppScreen.MY_DOCUMENTS },
+                                onShareClicked = { currentScreen = AppScreen.SHARE_NOTICE }
+                            )
+                        }
+                        AppScreen.SHARE_NOTICE -> {
+                            ShareNoticeScreen(
+                                onBackClicked = { currentScreen = AppScreen.DOCUMENT_DETAILS }
                             )
                         }
                     }
@@ -214,7 +220,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS, SHARE_NOTICE
 }
 
 @Composable
@@ -5991,7 +5997,8 @@ fun SuggestedActionCard(
 
 @Composable
 fun DocumentDetailsScreen(
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onShareClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -6356,7 +6363,7 @@ fun DocumentDetailsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
-                    onClick = { },
+                    onClick = { onShareClicked() },
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
@@ -6385,6 +6392,375 @@ fun DocumentDetailsScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = "Delete", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444))
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ShareNoticeScreen(
+    onBackClicked: () -> Unit
+) {
+    var selectedAccessLevel by remember { mutableStateOf("View Only") }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Header
+                Text(
+                    text = "F • DOCUMENT HISTORY & SHARING",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF334155),
+                            modifier = Modifier
+                                .clickable { onBackClicked() }
+                                .padding(end = 12.dp)
+                        )
+                        Text(
+                            text = "Share notice",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Text(text = "•••", fontSize = 18.sp, color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Info Banner
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color(0xFFEFF6FF),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFFDBEAFE))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "ℹ️", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Sharing simulation only. No links are active and no recipients will receive this notice.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF2563EB),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Document Info Card
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(Color(0xFFEFF6FF), RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "📄", fontSize = 20.sp)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Innovation Week 2026",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Original PDF • 2 verified actions",
+                                fontSize = 11.sp,
+                                color = Color(0xFF64748B)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Device share - Preview
+                Text(
+                    text = "Device share - Preview",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(52.dp)
+                                .background(Color(0xFFF1F5F9), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "💬", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(text = "Messages", fontSize = 11.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(52.dp)
+                                .background(Color(0xFFF1F5F9), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "✉️", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(text = "Email", fontSize = 11.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(52.dp)
+                                .background(Color(0xFFF1F5F9), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "•••", fontSize = 20.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(text = "More", fontSize = 11.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🔗", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Copy link - When supported",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2563EB)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Authorized group
+                Text(
+                    text = "Authorized group",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "College Students • 24 members",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF334155)
+                        )
+                        Text(text = "∨", fontSize = 14.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Recipient • Group member
+                Text(
+                    text = "Recipient • Group member",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Alex Rivera • Editor",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF334155)
+                        )
+                        Text(text = "👤", fontSize = 16.sp, color = Color(0xFF94A3B8))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Access level
+                Text(
+                    text = "Access level",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF1F5F9), RoundedCornerShape(12.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(
+                                if (selectedAccessLevel == "View Only") Color.White else Color.Transparent,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .shadow(
+                                if (selectedAccessLevel == "View Only") 1.dp else 0.dp,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { selectedAccessLevel = "View Only" }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "View Only",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (selectedAccessLevel == "View Only") Color(0xFF2563EB) else Color(0xFF64748B)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(
+                                if (selectedAccessLevel == "Collaborate") Color.White else Color.Transparent,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .shadow(
+                                if (selectedAccessLevel == "Collaborate") 1.dp else 0.dp,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { selectedAccessLevel = "Collaborate" }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Collaborate",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (selectedAccessLevel == "Collaborate") Color(0xFF2563EB) else Color(0xFF64748B)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "*Only authorized group members can be invited. Collaborate permits task edits, not PDF changes.",
+                    fontSize = 11.sp,
+                    color = Color(0xFF94A3B8),
+                    lineHeight = 15.sp
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            // Confirm Share Button
+            Button(
+                onClick = { onBackClicked() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "🔗", fontSize = 16.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Confirm Share - Simulation",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
         }
