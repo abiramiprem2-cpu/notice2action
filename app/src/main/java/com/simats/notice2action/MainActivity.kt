@@ -148,7 +148,8 @@ class MainActivity : ComponentActivity() {
                                     onLogout = { currentScreen = AppScreen.LOGIN },
                                     onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
                                     onCalendarClicked = { currentScreen = AppScreen.CALENDAR },
-                                    onMyDocumentsClicked = { currentScreen = AppScreen.MY_DOCUMENTS }
+                                    onMyDocumentsClicked = { currentScreen = AppScreen.MY_DOCUMENTS },
+                                    onGroupsClicked = { currentScreen = AppScreen.YOUR_GROUPS }
                                 )
                             }
                         }
@@ -172,7 +173,8 @@ class MainActivity : ComponentActivity() {
                                 onLogoutClicked = { currentScreen = AppScreen.LOGIN },
                                 onSettingsClicked = { currentScreen = AppScreen.SETTINGS_PRIVACY },
                                 onHelpClicked = { currentScreen = AppScreen.HELP_SUPPORT },
-                                onTasksClicked = { currentScreen = AppScreen.MY_TASKS }
+                                onTasksClicked = { currentScreen = AppScreen.MY_TASKS },
+                                onGroupsClicked = { currentScreen = AppScreen.YOUR_GROUPS }
                             )
                         }
                         AppScreen.SETTINGS_PRIVACY -> {
@@ -225,7 +227,18 @@ class MainActivity : ComponentActivity() {
                         }
                         AppScreen.TASK_DETAILS -> {
                             TaskDetailsScreen(
-                                onBackClicked = { currentScreen = AppScreen.MY_TASKS }
+                                onBackClicked = { currentScreen = AppScreen.MY_TASKS },
+                                onEditClicked = { currentScreen = AppScreen.EDIT_TASK }
+                            )
+                        }
+                        AppScreen.EDIT_TASK -> {
+                            EditTaskScreen(
+                                onBackClicked = { currentScreen = AppScreen.TASK_DETAILS }
+                            )
+                        }
+                        AppScreen.YOUR_GROUPS -> {
+                            YourGroupsScreen(
+                                onBackClicked = { currentScreen = AppScreen.MAIN }
                             )
                         }
                     }
@@ -236,7 +249,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS, SHARE_NOTICE, MY_TASKS, TASK_DETAILS
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS, SHARE_NOTICE, MY_TASKS, TASK_DETAILS, EDIT_TASK, YOUR_GROUPS
 }
 
 @Composable
@@ -1867,7 +1880,8 @@ fun NavigationDrawerScreen(
     onLogout: () -> Unit,
     onRemindersClicked: () -> Unit = {},
     onCalendarClicked: () -> Unit = {},
-    onMyDocumentsClicked: () -> Unit = {}
+    onMyDocumentsClicked: () -> Unit = {},
+    onGroupsClicked: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -1985,6 +1999,7 @@ fun NavigationDrawerScreen(
                                         "My Documents" -> onMyDocumentsClicked()
                                         "Reminders" -> onRemindersClicked()
                                         "Calendar" -> onCalendarClicked()
+                                        "Groups" -> onGroupsClicked()
                                         else -> onClose()
                                     }
                                 }
@@ -4201,7 +4216,8 @@ fun ProfileScreen(
     onLogoutClicked: () -> Unit,
     onSettingsClicked: () -> Unit = {},
     onHelpClicked: () -> Unit = {},
-    onTasksClicked: () -> Unit = {}
+    onTasksClicked: () -> Unit = {},
+    onGroupsClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -4312,7 +4328,7 @@ fun ProfileScreen(
                         HorizontalDivider(color = Color(0xFFF1F5F9))
                         ProfileSettingsRow("A/文", "Language", "English")
                         HorizontalDivider(color = Color(0xFFF1F5F9))
-                        ProfileSettingsRow("👥", "My groups", "3 groups - 1 admin role")
+                        ProfileSettingsRow("👥", "My groups", "3 groups - 1 admin role", onClick = { onGroupsClicked() })
                     }
                 }
 
@@ -7177,7 +7193,8 @@ fun TaskCardItem(
 
 @Composable
 fun TaskDetailsScreen(
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onEditClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -7505,7 +7522,7 @@ fun TaskDetailsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Button(
-                        onClick = { },
+                        onClick = { onEditClicked() },
                         modifier = Modifier
                             .weight(1f)
                             .height(44.dp),
@@ -7562,6 +7579,647 @@ fun TaskDetailsScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun EditTaskScreen(
+    onBackClicked: () -> Unit
+) {
+    var taskTitle by remember { mutableStateOf("Submit project proposal") }
+    var description by remember { mutableStateOf("Upload the abstract and team member details to the student portal.") }
+    var selectedPriority by remember { mutableStateOf("High") }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFFEEF2FF), CircleShape)
+                                .clickable { onBackClicked() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "←", fontSize = 18.sp, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "D • TASK CREATION & MANAGEMENT",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Edit task",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "✕",
+                        fontSize = 18.sp,
+                        color = Color(0xFF2563EB),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { onBackClicked() }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Task title
+                Text(
+                    text = "Task title",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Text(
+                        text = taskTitle,
+                        fontSize = 14.sp,
+                        color = Color(0xFF0F172A),
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Description
+                Text(
+                    text = "Description",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Text(
+                        text = description,
+                        fontSize = 13.sp,
+                        color = Color(0xFF334155),
+                        lineHeight = 18.sp,
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Due date • extracted
+                Text(
+                    text = "Due date • extracted",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "20 Oct 2026",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF0F172A)
+                        )
+                        Text(text = "📅", fontSize = 16.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Priority
+                Text(
+                    text = "Priority",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF1F5F9), RoundedCornerShape(12.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    listOf("High", "Medium", "Low").forEach { priority ->
+                        val isSelected = selectedPriority == priority
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    if (isSelected) Color.White else Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .shadow(
+                                    if (isSelected) 1.dp else 0.dp,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { selectedPriority = priority }
+                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = priority,
+                                fontSize = 13.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color(0xFF2563EB) else Color(0xFF64748B)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Category
+                Text(
+                    text = "Category",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Text(
+                        text = "College",
+                        fontSize = 14.sp,
+                        color = Color(0xFF0F172A),
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Checklist
+                Text(
+                    text = "Checklist",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .background(Color(0xFF2563EB), RoundedCornerShape(4.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "✓", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Draft project abstract",
+                            fontSize = 13.sp,
+                            color = Color(0xFF334155)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .border(1.5.dp, Color(0xFFCBD5E1), RoundedCornerShape(4.dp))
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Add team member details",
+                            fontSize = 13.sp,
+                            color = Color(0xFF334155)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .border(1.5.dp, Color(0xFFCBD5E1), RoundedCornerShape(4.dp))
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Upload proposal to student portal",
+                            fontSize = 13.sp,
+                            color = Color(0xFF334155)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Reminder • selected by you
+                Text(
+                    text = "Reminder • selected by you",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "19 Oct 2026 • 9:00 AM",
+                            fontSize = 14.sp,
+                            color = Color(0xFF0F172A)
+                        )
+                        Text(text = "🔔", fontSize = 16.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            // Save Task Button
+            Button(
+                onClick = { onBackClicked() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "✓", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Save Task",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun YourGroupsScreen(
+    onBackClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Header
+                Text(
+                    text = "G • GROUPS & COLLABORATION",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF334155),
+                            modifier = Modifier
+                                .clickable { onBackClicked() }
+                                .padding(end = 12.dp)
+                        )
+                        Text(
+                            text = "Your Groups",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Text(text = "👥", fontSize = 20.sp, color = Color(0xFF2563EB))
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Turn shared information into shared progress.",
+                    fontSize = 13.sp,
+                    color = Color(0xFF64748B)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Action buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "+", fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Create Group", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Button(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "👤+", fontSize = 16.sp, color = Color(0xFF2563EB))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Join Group", fontSize = 14.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Group List
+                GroupItemCard(
+                    icon = "🎓",
+                    title = "College Students",
+                    membersText = "24 members • Admin",
+                    subtitle = "Northbridge College • Innovation Week team hub"
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                GroupItemCard(
+                    icon = "💼",
+                    title = "Office Team",
+                    membersText = "12 members • Member",
+                    subtitle = "Policies, deadlines and team announcements"
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                GroupItemCard(
+                    icon = "🏢",
+                    title = "Apartment Residents",
+                    membersText = "48 members • Member",
+                    subtitle = "Cedar House • A more connected community"
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Shared notices Section
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Shared notices",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Text(
+                        text = "View all",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2563EB)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Shared Document Card
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .background(Color(0xFFEFF6FF), RoundedCornerShape(10.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = "📄", fontSize = 20.sp)
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = "Innovation Week 2026",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1E293B)
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "PDF • 15 Oct 2026 • 2 pages",
+                                        fontSize = 11.sp,
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = "•••",
+                                fontSize = 16.sp,
+                                color = Color(0xFF94A3B8),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFDCFCE7), RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = "Shared • Demo",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF16A34A)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "3 actions identified",
+                                fontSize = 11.sp,
+                                color = Color(0xFF64748B)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Group membership and shared content are fictional. Nothing has been published or sent.",
+                    fontSize = 11.sp,
+                    color = Color(0xFF94A3B8),
+                    lineHeight = 15.sp
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun GroupItemCard(
+    icon: String,
+    title: String,
+    membersText: String,
+    subtitle: String
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .background(Color(0xFFEFF6FF), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = icon, fontSize = 22.sp)
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = title,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = membersText,
+                        fontSize = 11.sp,
+                        color = Color(0xFF64748B)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = subtitle,
+                        fontSize = 11.sp,
+                        color = Color(0xFF94A3B8)
+                    )
+                }
+            }
+
+            Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
         }
     }
 }
