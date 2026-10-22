@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,7 +91,8 @@ class MainActivity : ComponentActivity() {
                                 onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
                                 onProfileClicked = { currentScreen = AppScreen.PROFILE },
                                 onMenuClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
-                                onRemindersClicked = { currentScreen = AppScreen.REMINDERS }
+                                onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
+                                onMyDocumentsClicked = { currentScreen = AppScreen.MY_DOCUMENTS }
                             )
                         }
                         AppScreen.SCAN_DOCUMENT -> {
@@ -113,12 +116,18 @@ class MainActivity : ComponentActivity() {
                         AppScreen.NOTICE_DETAILS -> {
                             NoticeDetailsScreen(
                                 onBackClicked = { currentScreen = AppScreen.DOCUMENT_PREVIEW },
-                                onGenerateActions = { currentScreen = AppScreen.UPCOMING_ACTIONS }
+                                onGenerateActions = { currentScreen = AppScreen.REVIEW_ACTIONS }
+                            )
+                        }
+                        AppScreen.REVIEW_ACTIONS -> {
+                            ReviewSuggestedActionsScreen(
+                                onBackClicked = { currentScreen = AppScreen.NOTICE_DETAILS },
+                                onConfirmActions = { currentScreen = AppScreen.UPCOMING_ACTIONS }
                             )
                         }
                         AppScreen.UPCOMING_ACTIONS -> {
                             UpcomingActionsScreen(
-                                onBackClicked = { currentScreen = AppScreen.NOTICE_DETAILS },
+                                onBackClicked = { currentScreen = AppScreen.REVIEW_ACTIONS },
                                 onHomeClicked = { currentScreen = AppScreen.MAIN }
                             )
                         }
@@ -129,14 +138,16 @@ class MainActivity : ComponentActivity() {
                                     onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
                                     onProfileClicked = { },
                                     onMenuClicked = { },
-                                    onRemindersClicked = { currentScreen = AppScreen.REMINDERS }
+                                    onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
+                                    onMyDocumentsClicked = { currentScreen = AppScreen.MY_DOCUMENTS }
                                 )
                                 NavigationDrawerScreen(
                                     onClose = { currentScreen = AppScreen.MAIN },
                                     onHome = { currentScreen = AppScreen.MAIN },
                                     onLogout = { currentScreen = AppScreen.LOGIN },
                                     onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
-                                    onCalendarClicked = { currentScreen = AppScreen.CALENDAR }
+                                    onCalendarClicked = { currentScreen = AppScreen.CALENDAR },
+                                    onMyDocumentsClicked = { currentScreen = AppScreen.MY_DOCUMENTS }
                                 )
                             }
                         }
@@ -183,6 +194,18 @@ class MainActivity : ComponentActivity() {
                                 onBackClicked = { currentScreen = AppScreen.MAIN }
                             )
                         }
+                        AppScreen.MY_DOCUMENTS -> {
+                            MyDocumentsScreen(
+                                onBackClicked = { currentScreen = AppScreen.MAIN },
+                                onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
+                                onDocumentClicked = { currentScreen = AppScreen.DOCUMENT_DETAILS }
+                            )
+                        }
+                        AppScreen.DOCUMENT_DETAILS -> {
+                            DocumentDetailsScreen(
+                                onBackClicked = { currentScreen = AppScreen.MY_DOCUMENTS }
+                            )
+                        }
                     }
                 }
             }
@@ -191,7 +214,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS
 }
 
 @Composable
@@ -1384,7 +1407,8 @@ fun DashboardScreen(
     onUploadDocumentClicked: () -> Unit,
     onProfileClicked: () -> Unit,
     onMenuClicked: () -> Unit,
-    onRemindersClicked: () -> Unit = {}
+    onRemindersClicked: () -> Unit = {},
+    onMyDocumentsClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -1592,7 +1616,8 @@ fun DashboardScreen(
                         text = "View all",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF2563EB)
+                        color = Color(0xFF2563EB),
+                        modifier = Modifier.clickable { onMyDocumentsClicked() }
                     )
                 }
 
@@ -1816,7 +1841,8 @@ fun NavigationDrawerScreen(
     onHome: () -> Unit,
     onLogout: () -> Unit,
     onRemindersClicked: () -> Unit = {},
-    onCalendarClicked: () -> Unit = {}
+    onCalendarClicked: () -> Unit = {},
+    onMyDocumentsClicked: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -1931,6 +1957,7 @@ fun NavigationDrawerScreen(
                                 .clickable {
                                     when (title) {
                                         "Home" -> onHome()
+                                        "My Documents" -> onMyDocumentsClicked()
                                         "Reminders" -> onRemindersClicked()
                                         "Calendar" -> onCalendarClicked()
                                         else -> onClose()
@@ -3250,7 +3277,11 @@ fun UpcomingActionsScreen(
                         }
                     }
 
-                    Text(text = "📅", fontSize = 20.sp)
+                    Text(
+                        text = "📅",
+                        fontSize = 20.sp,
+                        modifier = Modifier.clickable { onHomeClicked() }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -5127,14 +5158,14 @@ fun CalendarScreen(
                     // Calendar Grid (Mock)
                     val days = (1..30).toList()
                     var dayIndex = 0
-                    for (row in 0..4) {
+                    repeat(5) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            for (col in 0..6) {
+                            repeat(7) {
                                 if (dayIndex < days.size) {
                                     val day = days[dayIndex]
                                     val isSelected = day == 24
@@ -5315,6 +5346,1047 @@ fun EventCard(time: String, title: String, subtitle: String, barColor: Color) {
             }
             
             Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
+        }
+    }
+}
+
+@Composable
+fun MyDocumentsScreen(
+    onBackClicked: () -> Unit,
+    onUploadDocumentClicked: () -> Unit,
+    onDocumentClicked: () -> Unit = {}
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            // Header
+            Text(
+                text = "F • DOCUMENT HISTORY & SHARING",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF64748B)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "←",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF334155),
+                        modifier = Modifier
+                            .clickable { onBackClicked() }
+                            .padding(end = 12.dp)
+                    )
+                    Text(
+                        text = "My Documents",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E293B)
+                    )
+                }
+                Text(text = "☷", fontSize = 20.sp, color = Color(0xFF3B82F6))
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Search bar
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 2.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "🔍", fontSize = 16.sp, color = Color(0xFF94A3B8))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Search documents",
+                        fontSize = 14.sp,
+                        color = Color(0xFF94A3B8),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(text = "≡", fontSize = 18.sp, color = Color(0xFF94A3B8))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Categories / Tabs
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFF1F5F9), RoundedCornerShape(12.dp))
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(Color.White, RoundedCornerShape(8.dp))
+                        .shadow(1.dp, RoundedCornerShape(8.dp))
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "All", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3B82F6))
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "College", fontSize = 12.sp, color = Color(0xFF64748B))
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Office", fontSize = 12.sp, color = Color(0xFF64748B))
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Apartment", fontSize = 12.sp, color = Color(0xFF64748B))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Date & Document count
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "October 2026",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Text(
+                    text = "12 documents",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF3B82F6)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Document List
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Card 1
+                DocumentCard(
+                    icon = "📄",
+                    title = "Innovation Week 2026",
+                    details = "PDF • 15 Oct 2026 • 2 pages",
+                    tagText = "Verify dates",
+                    tagBgColor = Color(0xFFFEF3C7),
+                    tagTextColor = Color(0xFFD97706),
+                    subtitle = "3 actions identified",
+                    onClick = { onDocumentClicked() }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Card 2
+                DocumentCard(
+                    icon = "📄",
+                    title = "October expense policy",
+                    details = "PDF • 14 Oct 2026 • 3 pages",
+                    tagText = "Processed",
+                    tagBgColor = Color(0xFFDCFCE7),
+                    tagTextColor = Color(0xFF16A34A),
+                    subtitle = "Open • Rename • Share • Delete",
+                    onClick = { onDocumentClicked() }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Card 3
+                DocumentCard(
+                    icon = "🖼️",
+                    title = "Cedar House fire safety",
+                    details = "JPG • 13 Oct 2026 • 1 page",
+                    tagText = "Processed",
+                    tagBgColor = Color(0xFFDCFCE7),
+                    tagTextColor = Color(0xFF16A34A),
+                    subtitle = "Open • Rename • Share • Delete",
+                    onClick = { onDocumentClicked() }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Card 4
+                DocumentCard(
+                    icon = "🖼️",
+                    title = "Community library renewal",
+                    details = "PNG • 12 Oct 2026 • 1 page",
+                    tagText = "Processing",
+                    tagBgColor = Color(0xFFDBEAFE),
+                    tagTextColor = Color(0xFF2563EB),
+                    subtitle = "Open • Rename • Share • Delete",
+                    onClick = { onDocumentClicked() }
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Upload button
+                Button(
+                    onClick = { onUploadDocumentClicked() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "📄", fontSize = 16.sp, color = Color(0xFF3B82F6))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Upload Document",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF3B82F6)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Document menu: Open, Rename, Share or Delete. & earlier documents continue below.",
+                    fontSize = 10.sp,
+                    color = Color(0xFF94A3B8),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun DocumentCard(
+    icon: String,
+    title: String,
+    details: String,
+    tagText: String,
+    tagBgColor: Color,
+    tagTextColor: Color,
+    subtitle: String,
+    onClick: () -> Unit = {}
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0xFFEFF6FF), RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = icon, fontSize = 20.sp)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = title,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = details,
+                            fontSize = 11.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+                }
+                Text(
+                    text = "•••",
+                    fontSize = 16.sp,
+                    color = Color(0xFF94A3B8),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .background(tagBgColor, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = tagText,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = tagTextColor
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    color = Color(0xFF64748B)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ReviewSuggestedActionsScreen(
+    onBackClicked: () -> Unit,
+    onConfirmActions: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFFEEF2FF), CircleShape)
+                                .clickable { onBackClicked() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "←", fontSize = 18.sp, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "D • TASK CREATION & MANAGEMENT",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Review suggested actions",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                        }
+                    }
+
+                    Text(text = "•••", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Info banner
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFEFF6FF), RoundedCornerShape(12.dp))
+                        .padding(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "ℹ️", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "2 ready to confirm • 1 needs verification. All fields are editable.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF2563EB),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Action Card 1
+                SuggestedActionCard(
+                    title = "Submit project proposal",
+                    description = "Upload abstract and team details to the student portal.",
+                    dateTime = "20 Oct 2026 • 5:00 PM",
+                    priorityText = "High",
+                    priorityBg = Color(0xFFFEE2E2),
+                    priorityTextColor = Color(0xFFEF4444),
+                    statusText = "Verified date",
+                    statusBg = Color(0xFFDCFCE7),
+                    statusTextColor = Color(0xFF16A34A),
+                    quote = "\"Submit your project proposal by 20 October...\" • p.1"
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Action Card 2
+                SuggestedActionCard(
+                    title = "Attend team briefing",
+                    description = "Meet the team at Innovation Lab B.",
+                    dateTime = "22 Oct 2026 • 10:00 AM",
+                    priorityText = "Medium",
+                    priorityBg = Color(0xFFFEF3C7),
+                    priorityTextColor = Color(0xFFD97706),
+                    statusText = "Verified date",
+                    statusBg = Color(0xFFDCFCE7),
+                    statusTextColor = Color(0xFF16A34A),
+                    quote = "\"Attend the briefing on 22 October, 10:00 AM...\" • p.1"
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Action Card 3
+                SuggestedActionCard(
+                    title = "Prepare final presentation",
+                    description = "Confirm time with Dr. Brooks before scheduling.",
+                    dateTime = "24 Oct 2026 • 2:00 PM*",
+                    priorityText = "High",
+                    priorityBg = Color(0xFFFEE2E2),
+                    priorityTextColor = Color(0xFFEF4444),
+                    statusText = "Excluded • Verify time",
+                    statusBg = Color(0xFFFEF3C7),
+                    statusTextColor = Color(0xFFD97706),
+                    quote = "\"Final presentation... 2:00 PM*...\" • p.1"
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Add another action button
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "+", fontSize = 18.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Add another action",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2563EB)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Reminders are chosen separately after confirming tasks.",
+                    fontSize = 11.sp,
+                    color = Color(0xFF64748B),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Confirm Actions Button
+            Button(
+                onClick = { onConfirmActions() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "✓", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Confirm Actions (2 verified)",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SuggestedActionCard(
+    title: String,
+    description: String,
+    dateTime: String,
+    priorityText: String,
+    priorityBg: Color,
+    priorityTextColor: Color,
+    statusText: String,
+    statusBg: Color,
+    statusTextColor: Color,
+    quote: String
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A),
+                    modifier = Modifier.weight(1f)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "✏️", fontSize = 14.sp, color = Color(0xFF2563EB))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = "✕", fontSize = 14.sp, color = Color(0xFF94A3B8))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                color = Color(0xFF64748B),
+                lineHeight = 16.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Date pill
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFF8FAFC),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "📅", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = dateTime,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF334155)
+                        )
+                    }
+                    Text(text = "✏️", fontSize = 12.sp, color = Color(0xFF94A3B8))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Tags
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .background(priorityBg, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = priorityText,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = priorityTextColor
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .background(statusBg, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = statusText,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = statusTextColor
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = quote,
+                fontSize = 11.sp,
+                color = Color(0xFF94A3B8),
+                lineHeight = 14.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun DocumentDetailsScreen(
+    onBackClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Header
+                Text(
+                    text = "F • DOCUMENT HISTORY & SHARING",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF334155),
+                            modifier = Modifier
+                                .clickable { onBackClicked() }
+                                .padding(end = 12.dp)
+                        )
+                        Text(
+                            text = "Document details",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Text(text = "•••", fontSize = 18.sp, color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Document Title & Badges
+                Text(
+                    text = "Innovation Week 2026",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFDBEAFE), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "PDF • College",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2563EB)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFDCFCE7), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "2 verified actions",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF16A34A)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Uploaded 15 Oct 2026, 9:30 AM • Browse Files • Maya Chen",
+                    fontSize = 11.sp,
+                    color = Color(0xFF64748B)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Tabs: Original / Text / Summary
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF1F5F9), RoundedCornerShape(12.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color.White, RoundedCornerShape(8.dp))
+                            .shadow(1.dp, RoundedCornerShape(8.dp))
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Original", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Text", fontSize = 13.sp, color = Color(0xFF64748B))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Summary", fontSize = 13.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Original Document Card Preview
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .background(Color(0xFF0F172A), RoundedCornerShape(6.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "🎓", fontSize = 16.sp, color = Color.White)
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "NORTHBRIDGE COLLEGE",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Text(
+                                    text = "Office of Student Innovation",
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        HorizontalDivider(color = Color(0xFF2563EB), thickness = 2.dp)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "INNOVATION WEEK 2026",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "NOTICE • 15 OCTOBER 2026 • REF: IS/2026/04",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF64748B)
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "All student teams are invited to present a solution that makes everyday life better.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF334155),
+                            lineHeight = 16.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Submit your project proposal by 20 October 2026, 5:00 PM.",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A),
+                            lineHeight = 16.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Upload the proposal through the student portal. Include the abstract and team member details.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF334155),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Summary: proposal due 20 Oct; briefing on 22 Oct. Presentation on 24 Oct has a provisional time.",
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B),
+                    lineHeight = 16.sp
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Related tasks section
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Related tasks",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Text(
+                        text = "2 tasks",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2563EB)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Task item
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .border(1.5.dp, Color(0xFFCBD5E1), RoundedCornerShape(4.dp))
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Submit project proposal",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Innovation Week 2026",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(text = "📅 20 Oct • 5:00 PM", fontSize = 11.sp, color = Color(0xFF334155))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .background(Color(0xFFFEE2E2), RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(text = "High", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444))
+                                    }
+                                }
+                            }
+                        }
+
+                        Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Secondary Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(text = "🔄 Reprocess", fontSize = 13.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Button(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(text = "+ Create Action", fontSize = 13.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Attend team briefing • 22 Oct, 10:00 AM →",
+                    fontSize = 12.sp,
+                    color = Color(0xFF2563EB),
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Bottom Share & Delete Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🔗", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Share", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEF2F2)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🗑️", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Delete", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444))
+                    }
+                }
+            }
         }
     }
 }
