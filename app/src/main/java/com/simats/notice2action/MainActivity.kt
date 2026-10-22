@@ -92,7 +92,8 @@ class MainActivity : ComponentActivity() {
                                 onProfileClicked = { currentScreen = AppScreen.PROFILE },
                                 onMenuClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
                                 onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
-                                onMyDocumentsClicked = { currentScreen = AppScreen.MY_DOCUMENTS }
+                                onMyDocumentsClicked = { currentScreen = AppScreen.MY_DOCUMENTS },
+                                onTasksClicked = { currentScreen = AppScreen.MY_TASKS }
                             )
                         }
                         AppScreen.SCAN_DOCUMENT -> {
@@ -155,7 +156,8 @@ class MainActivity : ComponentActivity() {
                             RemindersScreen(
                                 onHomeClicked = { currentScreen = AppScreen.MAIN },
                                 onProfileClicked = { currentScreen = AppScreen.PROFILE },
-                                onSettingsClicked = { currentScreen = AppScreen.REMINDER_SETTINGS }
+                                onSettingsClicked = { currentScreen = AppScreen.REMINDER_SETTINGS },
+                                onTasksClicked = { currentScreen = AppScreen.MY_TASKS }
                             )
                         }
                         AppScreen.REMINDER_SETTINGS -> {
@@ -169,7 +171,8 @@ class MainActivity : ComponentActivity() {
                                 onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
                                 onLogoutClicked = { currentScreen = AppScreen.LOGIN },
                                 onSettingsClicked = { currentScreen = AppScreen.SETTINGS_PRIVACY },
-                                onHelpClicked = { currentScreen = AppScreen.HELP_SUPPORT }
+                                onHelpClicked = { currentScreen = AppScreen.HELP_SUPPORT },
+                                onTasksClicked = { currentScreen = AppScreen.MY_TASKS }
                             )
                         }
                         AppScreen.SETTINGS_PRIVACY -> {
@@ -212,6 +215,13 @@ class MainActivity : ComponentActivity() {
                                 onBackClicked = { currentScreen = AppScreen.DOCUMENT_DETAILS }
                             )
                         }
+                        AppScreen.MY_TASKS -> {
+                            MyTasksScreen(
+                                onHomeClicked = { currentScreen = AppScreen.MAIN },
+                                onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
+                                onProfileClicked = { currentScreen = AppScreen.PROFILE }
+                            )
+                        }
                     }
                 }
             }
@@ -220,7 +230,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS, SHARE_NOTICE
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS, SHARE_NOTICE, MY_TASKS
 }
 
 @Composable
@@ -1414,7 +1424,8 @@ fun DashboardScreen(
     onProfileClicked: () -> Unit,
     onMenuClicked: () -> Unit,
     onRemindersClicked: () -> Unit = {},
-    onMyDocumentsClicked: () -> Unit = {}
+    onMyDocumentsClicked: () -> Unit = {},
+    onTasksClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -1810,7 +1821,9 @@ fun DashboardScreen(
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .clickable { onTasksClicked() }
+                            .padding(8.dp)
                     ) {
                         Text(text = "📋", fontSize = 16.sp)
                         Text(text = "Tasks", fontSize = 10.sp, color = Color(0xFF64748B))
@@ -3561,7 +3574,8 @@ fun TaskCard(
 fun RemindersScreen(
     onHomeClicked: () -> Unit,
     onProfileClicked: () -> Unit,
-    onSettingsClicked: () -> Unit = {}
+    onSettingsClicked: () -> Unit = {},
+    onTasksClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -3714,7 +3728,9 @@ fun RemindersScreen(
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .clickable { onTasksClicked() }
+                            .padding(8.dp)
                     ) {
                         Text(text = "📋", fontSize = 16.sp)
                         Text(text = "Tasks", fontSize = 10.sp, color = Color(0xFF64748B))
@@ -4178,7 +4194,8 @@ fun ProfileScreen(
     onRemindersClicked: () -> Unit,
     onLogoutClicked: () -> Unit,
     onSettingsClicked: () -> Unit = {},
-    onHelpClicked: () -> Unit = {}
+    onHelpClicked: () -> Unit = {},
+    onTasksClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -4349,7 +4366,9 @@ fun ProfileScreen(
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .clickable { onTasksClicked() }
+                            .padding(8.dp)
                     ) {
                         Text(text = "📋", fontSize = 16.sp)
                         Text(text = "Tasks", fontSize = 10.sp, color = Color(0xFF64748B))
@@ -6763,6 +6782,382 @@ fun ShareNoticeScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun MyTasksScreen(
+    onHomeClicked: () -> Unit,
+    onRemindersClicked: () -> Unit,
+    onProfileClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Top stats
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "5 active tasks • 2 completed",
+                        fontSize = 12.sp,
+                        color = Color(0xFF64748B)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFEEF2FF), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "This month",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF2563EB)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Search Bar
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "🔍", fontSize = 16.sp, color = Color(0xFF94A3B8))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Search your tasks",
+                            fontSize = 14.sp,
+                            color = Color(0xFF94A3B8),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(text = "≡", fontSize = 18.sp, color = Color(0xFF94A3B8))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Tabs
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF1F5F9), RoundedCornerShape(12.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color.White, RoundedCornerShape(8.dp))
+                            .shadow(1.dp, RoundedCornerShape(8.dp))
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "All", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Pending", fontSize = 12.sp, color = Color(0xFF64748B))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "In Progress", fontSize = 12.sp, color = Color(0xFF64748B))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Completed", fontSize = 12.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Section Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Your next steps",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Text(
+                        text = "Due date ↓",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2563EB)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Task Cards
+                TaskCardItem(
+                    title = "Submit project proposal",
+                    subtitle = "Innovation Week 2026 • In progress",
+                    date = "20 Oct • 5:00 PM",
+                    priorityText = "High",
+                    priorityBg = Color(0xFFFEE2E2),
+                    priorityTextColor = Color(0xFFEF4444)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TaskCardItem(
+                    title = "Attend team briefing",
+                    subtitle = "Innovation Week 2026",
+                    date = "22 Oct • 10:00 AM",
+                    priorityText = "Medium",
+                    priorityBg = Color(0xFFFEF3C7),
+                    priorityTextColor = Color(0xFFD97706)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TaskCardItem(
+                    title = "Submit expense report",
+                    subtitle = "Office • October expenses",
+                    date = "23 Oct • 4:00 PM",
+                    priorityText = "Medium",
+                    priorityBg = Color(0xFFFEF3C7),
+                    priorityTextColor = Color(0xFFD97706)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Add Task Button
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "+", fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Add Task",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "2 more tasks continue below • Apartment & Community",
+                    fontSize = 11.sp,
+                    color = Color(0xFF64748B),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "1 unverified suggestion remains in your document review.",
+                    fontSize = 11.sp,
+                    color = Color(0xFF94A3B8),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Header title
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "D • TASK CREATION & MANAGEMENT",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF64748B)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "My Tasks",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+                    }
+                    Text(text = "☷", fontSize = 20.sp, color = Color(0xFF2563EB))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Bottom Navigation
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp, horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { onHomeClicked() }
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "🏠", fontSize = 16.sp)
+                        Text(text = "Home", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .background(Color(0xFFDBEAFE), RoundedCornerShape(16.dp))
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(text = "📋", fontSize = 16.sp)
+                        Text(text = "Tasks", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { onRemindersClicked() }
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "🔔", fontSize = 16.sp)
+                        Text(text = "Reminders", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { onProfileClicked() }
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "👤", fontSize = 16.sp)
+                        Text(text = "Profile", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskCardItem(
+    title: String,
+    subtitle: String,
+    date: String,
+    priorityText: String,
+    priorityBg: Color,
+    priorityTextColor: Color
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .border(1.5.dp, Color(0xFFCBD5E1), RoundedCornerShape(4.dp))
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = title,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = subtitle,
+                        fontSize = 11.sp,
+                        color = Color(0xFF64748B)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "📅 $date", fontSize = 11.sp, color = Color(0xFF334155))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(priorityBg, RoundedCornerShape(4.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = priorityText,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = priorityTextColor
+                            )
+                        }
+                    }
+                }
+            }
+
+            Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
         }
     }
 }
