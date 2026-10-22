@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.notice2action.ui.theme.Notice2actionTheme
@@ -82,7 +85,8 @@ class MainActivity : ComponentActivity() {
                                 onScanDocumentClicked = { currentScreen = AppScreen.SCAN_DOCUMENT },
                                 onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
                                 onProfileClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
-                                onMenuClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER }
+                                onMenuClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
+                                onRemindersClicked = { currentScreen = AppScreen.REMINDERS }
                             )
                         }
                         AppScreen.SCAN_DOCUMENT -> {
@@ -121,14 +125,28 @@ class MainActivity : ComponentActivity() {
                                     onScanDocumentClicked = { currentScreen = AppScreen.SCAN_DOCUMENT },
                                     onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
                                     onProfileClicked = { },
-                                    onMenuClicked = { }
+                                    onMenuClicked = { },
+                                    onRemindersClicked = { currentScreen = AppScreen.REMINDERS }
                                 )
                                 NavigationDrawerScreen(
                                     onClose = { currentScreen = AppScreen.MAIN },
                                     onHome = { currentScreen = AppScreen.MAIN },
-                                    onLogout = { currentScreen = AppScreen.LOGIN }
+                                    onLogout = { currentScreen = AppScreen.LOGIN },
+                                    onRemindersClicked = { currentScreen = AppScreen.REMINDERS }
                                 )
                             }
+                        }
+                        AppScreen.REMINDERS -> {
+                            RemindersScreen(
+                                onHomeClicked = { currentScreen = AppScreen.MAIN },
+                                onProfileClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
+                                onSettingsClicked = { currentScreen = AppScreen.REMINDER_SETTINGS }
+                            )
+                        }
+                        AppScreen.REMINDER_SETTINGS -> {
+                            ReminderSettingsScreen(
+                                onBackClicked = { currentScreen = AppScreen.REMINDERS }
+                            )
                         }
                     }
                 }
@@ -138,7 +156,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS
 }
 
 @Composable
@@ -1330,7 +1348,8 @@ fun DashboardScreen(
     onScanDocumentClicked: () -> Unit,
     onUploadDocumentClicked: () -> Unit,
     onProfileClicked: () -> Unit,
-    onMenuClicked: () -> Unit
+    onMenuClicked: () -> Unit,
+    onRemindersClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -1733,7 +1752,9 @@ fun DashboardScreen(
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .clickable { onRemindersClicked() }
+                            .padding(8.dp)
                     ) {
                         Text(text = "🔔", fontSize = 16.sp)
                         Text(text = "Reminders", fontSize = 10.sp, color = Color(0xFF64748B))
@@ -1758,7 +1779,8 @@ fun DashboardScreen(
 fun NavigationDrawerScreen(
     onClose: () -> Unit,
     onHome: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onRemindersClicked: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -1871,8 +1893,11 @@ fun NavigationDrawerScreen(
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(if (isSelected) Color(0xFFEEF2FF) else Color.Transparent)
                                 .clickable {
-                                    if (title == "Home") onHome()
-                                    else onClose()
+                                    when (title) {
+                                        "Home" -> onHome()
+                                        "Reminders" -> onRemindersClicked()
+                                        else -> onClose()
+                                    }
                                 }
                                 .padding(horizontal = 12.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -3452,6 +3477,621 @@ fun TaskCard(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2563EB)
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RemindersScreen(
+    onHomeClicked: () -> Unit,
+    onProfileClicked: () -> Unit,
+    onSettingsClicked: () -> Unit = {}
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Header
+                Text(
+                    text = "DEADLINE INFO & NOTIFICATIONS",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Reminders",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E293B)
+                    )
+                    Text(text = "⚲", fontSize = 20.sp, color = Color(0xFF2563EB))
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                // Tabs
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp))
+                        .padding(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color.White, RoundedCornerShape(6.dp))
+                            .shadow(1.dp, RoundedCornerShape(6.dp))
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Upcoming", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Past", fontSize = 12.sp, color = Color(0xFF64748B))
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "3 scheduled - 2 enabled", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text(text = "October 2026", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Cards
+                ReminderCard(
+                    title = "Submit project proposal",
+                    date = "18 Oct 2026 - 9:00 AM",
+                    deadline = "20 Oct - 5:00 PM",
+                    enabled = true
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                ReminderCard(
+                    title = "Attend team briefing",
+                    date = "22 Oct 2026 - 9:00 AM",
+                    deadline = "22 Oct - 10:30 AM",
+                    enabled = true
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                ReminderCard(
+                    title = "Submit expense report",
+                    date = "22 Oct 2026 - 9:00 AM",
+                    deadline = "23 Oct - 4:00 PM",
+                    enabled = false
+                )
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                Button(
+                    onClick = { onSettingsClicked() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEFF6FF)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "⚙️ Reminder Settings", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "Push delivery is not connected in this static demo. Past reminders remain available in the Past tab.",
+                    fontSize = 10.sp,
+                    color = Color(0xFF94A3B8),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            
+            // Bottom navigation
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp, horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { onHomeClicked() }
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "🏠", fontSize = 16.sp)
+                        Text(text = "Home", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Text(text = "📋", fontSize = 16.sp)
+                        Text(text = "Tasks", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .background(Color(0xFFDBEAFE), RoundedCornerShape(16.dp))
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(text = "🔔", fontSize = 16.sp)
+                        Text(text = "Reminders", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { onProfileClicked() }
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "👤", fontSize = 16.sp)
+                        Text(text = "Profile", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ReminderCard(
+    title: String,
+    date: String,
+    deadline: String,
+    enabled: Boolean
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.White,
+        shape = RoundedCornerShape(12.dp),
+        shadowElevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "🔔", fontSize = 16.sp, color = Color(0xFF3B82F6))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                }
+                
+                Switch(
+                    checked = enabled,
+                    onCheckedChange = null,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF3B82F6),
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = Color(0xFFCBD5E1)
+                    ),
+                    modifier = Modifier.scale(0.8f)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(text = date, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF334155))
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Task deadline: $deadline", fontSize = 12.sp, color = Color(0xFF64748B))
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = if (enabled) Color(0xFFDCFCE7) else Color(0xFFF1F5F9),
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = if (enabled) "Enabled" else "Disabled",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (enabled) Color(0xFF16A34A) else Color(0xFF64748B)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Scheduled by you", fontSize = 10.sp, color = Color(0xFF94A3B8))
+                }
+                
+                Row {
+                    Text(text = "✏️", fontSize = 14.sp, color = Color(0xFF3B82F6))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = "🗑️", fontSize = 14.sp, color = Color(0xFFEF4444))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ReminderSettingsScreen(
+    onBackClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "←",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF334155),
+                        modifier = Modifier
+                            .clickable { onBackClicked() }
+                            .padding(end = 12.dp)
+                    )
+                    Text(
+                        text = "Reminder settings",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E293B)
+                    )
+                }
+                Text(
+                    text = "•••",
+                    fontSize = 20.sp,
+                    color = Color(0xFF3B82F6),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Allow Notifications
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 2.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🔔", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Allow notifications",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1E293B)
+                            )
+                            Text(
+                                text = "Visual preference - Not device permission",
+                                fontSize = 12.sp,
+                                color = Color(0xFF94A3B8)
+                            )
+                        }
+                    }
+                    Switch(
+                        checked = true,
+                        onCheckedChange = null,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF3B82F6)
+                        ),
+                        modifier = Modifier.scale(0.8f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Default reminder presets
+            Text(
+                text = "Default reminder presets",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1E293B)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 2.dp
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    val presets = listOf(
+                        "On the due day" to false,
+                        "1 day before" to true,
+                        "3 days before" to false,
+                        "7 days before" to false
+                    )
+                    presets.forEach { (text, isChecked) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .background(
+                                        color = if (isChecked) Color(0xFF3B82F6) else Color.White,
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isChecked) Color.Transparent else Color(0xFFCBD5E1),
+                                        shape = RoundedCornerShape(4.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isChecked) {
+                                    Text(text = "✓", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = text, fontSize = 14.sp, color = Color(0xFF334155))
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Custom schedule
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Custom schedule",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Text(
+                    text = "Proposal task",
+                    fontSize = 12.sp,
+                    color = Color(0xFF3B82F6),
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Date", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White,
+                        shape = RoundedCornerShape(8.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "19 Oct 2026", fontSize = 14.sp, color = Color(0xFF334155))
+                            Text(text = "📅", fontSize = 16.sp, color = Color(0xFF64748B))
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Time", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White,
+                        shape = RoundedCornerShape(8.dp),
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "9:00 AM", fontSize = 14.sp, color = Color(0xFF334155))
+                            Text(text = "🕒", fontSize = 16.sp, color = Color(0xFF64748B))
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Box(
+                modifier = Modifier
+                    .background(Color(0xFFEEF2FF), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "USER-SELECTED REMINDER - LOCAL TIME",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF3B82F6)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Settings Switches
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 2.dp
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "🔊", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Notification sound",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1E293B)
+                                )
+                                Text(
+                                    text = "Soft chime",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF94A3B8)
+                                )
+                            }
+                        }
+                        Switch(
+                            checked = true,
+                            onCheckedChange = null,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFF3B82F6)
+                            ),
+                            modifier = Modifier.scale(0.8f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "📳", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Vibration",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1E293B)
+                            )
+                        }
+                        Switch(
+                            checked = false,
+                            onCheckedChange = null,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFFE2E8F0),
+                                uncheckedThumbColor = Color.White,
+                                uncheckedTrackColor = Color(0xFFCBD5E1)
+                            ),
+                            modifier = Modifier.scale(0.8f)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Info Banner
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFEEF2FF), RoundedCornerShape(8.dp))
+                    .padding(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(text = "ℹ️", fontSize = 16.sp, color = Color(0xFF3B82F6))
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "Reminder: 19 Oct, 9:00 AM. Extracted deadline: 20 Oct, 5:00 PM. These are separate.",
+                    fontSize = 12.sp,
+                    color = Color(0xFF3B82F6),
+                    lineHeight = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Save Button
+            Button(
+                onClick = { onBackClicked() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6)),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "✓", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Save Settings", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Medium)
                 }
             }
         }
