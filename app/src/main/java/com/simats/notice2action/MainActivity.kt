@@ -156,7 +156,8 @@ class MainActivity : ComponentActivity() {
                                 onHomeClicked = { currentScreen = AppScreen.MAIN },
                                 onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
                                 onLogoutClicked = { currentScreen = AppScreen.LOGIN },
-                                onSettingsClicked = { currentScreen = AppScreen.SETTINGS_PRIVACY }
+                                onSettingsClicked = { currentScreen = AppScreen.SETTINGS_PRIVACY },
+                                onHelpClicked = { currentScreen = AppScreen.HELP_SUPPORT }
                             )
                         }
                         AppScreen.SETTINGS_PRIVACY -> {
@@ -171,6 +172,11 @@ class MainActivity : ComponentActivity() {
                                 onBackClicked = { currentScreen = AppScreen.SETTINGS_PRIVACY }
                             )
                         }
+                        AppScreen.HELP_SUPPORT -> {
+                            HelpSupportScreen(
+                                onBackClicked = { currentScreen = AppScreen.PROFILE }
+                            )
+                        }
                     }
                 }
             }
@@ -179,7 +185,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT
 }
 
 @Composable
@@ -4126,7 +4132,8 @@ fun ProfileScreen(
     onHomeClicked: () -> Unit,
     onRemindersClicked: () -> Unit,
     onLogoutClicked: () -> Unit,
-    onSettingsClicked: () -> Unit = {}
+    onSettingsClicked: () -> Unit = {},
+    onHelpClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -4255,7 +4262,7 @@ fun ProfileScreen(
                         HorizontalDivider(color = Color(0xFFF1F5F9))
                         ProfileSettingsRow("🛡️", "Privacy & data", "Your documents, your control")
                         HorizontalDivider(color = Color(0xFFF1F5F9))
-                        ProfileSettingsRow("❓", "Help and Support", "Guides and contact options")
+                        ProfileSettingsRow("❓", "Help and Support", "Guides and contact options", onClick = { onHelpClicked() })
                     }
                 }
                 
@@ -4720,6 +4727,273 @@ fun LanguageRow(languageName: String, isSelected: Boolean) {
                 modifier = Modifier
                     .size(24.dp)
                     .border(1.dp, Color(0xFFCBD5E1), CircleShape)
+            )
+        }
+    }
+}
+
+
+@Composable
+fun HelpSupportScreen(
+    onBackClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Header
+                Text(
+                    text = "H • PROFILE, SETTINGS & SUPPORT",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF334155),
+                            modifier = Modifier
+                                .clickable { onBackClicked() }
+                                .padding(end = 12.dp)
+                        )
+                        Text(
+                            text = "Help & Support",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Text(text = "❓", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Search Bar
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(8.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "🔍", fontSize = 16.sp, color = Color(0xFF94A3B8))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Search help articles",
+                            fontSize = 14.sp,
+                            color = Color(0xFF94A3B8),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(text = "≡", fontSize = 18.sp, color = Color(0xFF94A3B8))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // FAQ Section
+                Text(
+                    text = "Frequently asked questions",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        FaqItem(
+                            question = "How do I capture a notice?",
+                            answer = "Choose Scan Document or Upload Document. Keep the full page visible and use a clear PDF, JPG or PNG.",
+                            isExpanded = true
+                        )
+                        FaqItem("How do I review extracted actions?", null, false)
+                        FaqItem("Can I edit a task or its deadline?", null, false)
+                        FaqItem("How are reminders different from deadlines?", null, false)
+                        FaqItem("Why did my reminder not arrive?", null, false)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Contact Support Section
+                Text(
+                    text = "Contact Support",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Reply email",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(8.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "maya.chen@northbridge.example", fontSize = 14.sp, color = Color(0xFF334155))
+                        Text(text = "✉️", fontSize = 16.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Message",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334155)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    color = Color.White,
+                    shape = RoundedCornerShape(8.dp),
+                    shadowElevation = 1.dp,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    Text(
+                        text = "Tell us how we can help...",
+                        fontSize = 14.sp,
+                        color = Color(0xFF94A3B8),
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "✈️", fontSize = 16.sp, color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Send message • Demo", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Medium)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = { },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "🚩", fontSize = 14.sp, color = Color(0xFF3B82F6))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Report a Problem", fontSize = 14.sp, color = Color(0xFF3B82F6), fontWeight = FontWeight.Medium)
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(text = "v1.0.0", fontSize = 12.sp, color = Color(0xFF64748B))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "About Notice2Action\nTurn Documents Into Actions. Built to help students, teams and communities move from information to progress.",
+                    fontSize = 10.sp,
+                    color = Color(0xFF94A3B8),
+                    lineHeight = 14.sp
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun FaqItem(question: String, answer: String?, isExpanded: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = question,
+                fontSize = 12.sp,
+                fontWeight = if (isExpanded) FontWeight.Bold else FontWeight.Medium,
+                color = Color(0xFF334155)
+            )
+            Text(
+                text = if (isExpanded) "︿" else "﹀",
+                fontSize = 14.sp,
+                color = Color(0xFF64748B),
+                fontWeight = FontWeight.Bold
+            )
+        }
+        
+        if (isExpanded && answer != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = answer,
+                fontSize = 12.sp,
+                color = Color(0xFF64748B),
+                lineHeight = 16.sp
             )
         }
     }
