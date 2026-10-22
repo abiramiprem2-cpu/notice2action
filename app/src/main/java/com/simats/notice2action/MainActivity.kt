@@ -22,6 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
@@ -84,7 +87,7 @@ class MainActivity : ComponentActivity() {
                             DashboardScreen(
                                 onScanDocumentClicked = { currentScreen = AppScreen.SCAN_DOCUMENT },
                                 onUploadDocumentClicked = { currentScreen = AppScreen.UPLOAD_DOCUMENT },
-                                onProfileClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
+                                onProfileClicked = { currentScreen = AppScreen.PROFILE },
                                 onMenuClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
                                 onRemindersClicked = { currentScreen = AppScreen.REMINDERS }
                             )
@@ -139,13 +142,20 @@ class MainActivity : ComponentActivity() {
                         AppScreen.REMINDERS -> {
                             RemindersScreen(
                                 onHomeClicked = { currentScreen = AppScreen.MAIN },
-                                onProfileClicked = { currentScreen = AppScreen.NAVIGATION_DRAWER },
+                                onProfileClicked = { currentScreen = AppScreen.PROFILE },
                                 onSettingsClicked = { currentScreen = AppScreen.REMINDER_SETTINGS }
                             )
                         }
                         AppScreen.REMINDER_SETTINGS -> {
                             ReminderSettingsScreen(
                                 onBackClicked = { currentScreen = AppScreen.REMINDERS }
+                            )
+                        }
+                        AppScreen.PROFILE -> {
+                            ProfileScreen(
+                                onHomeClicked = { currentScreen = AppScreen.MAIN },
+                                onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
+                                onLogoutClicked = { currentScreen = AppScreen.LOGIN }
                             )
                         }
                     }
@@ -156,7 +166,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE
 }
 
 @Composable
@@ -4095,5 +4105,237 @@ fun ReminderSettingsScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ProfileScreen(
+    onHomeClicked: () -> Unit,
+    onRemindersClicked: () -> Unit,
+    onLogoutClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Header
+                Text(
+                    text = "H • PROFILE, SETTINGS & SUPPORT",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "My Profile",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E293B)
+                    )
+                    Text(text = "⚙️", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Profile Card
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color(0xFFF3F4F6), // Slightly lighter background for the card
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .background(Color(0xFFDBEAFE), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "👩‍💼", fontSize = 28.sp)
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    text = "Maya Chen",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1E293B)
+                                )
+                                Text(
+                                    text = "maya.chen@northbridge.example",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                                Text(
+                                    text = "Student • Northbridge College",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF3B82F6)
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Button(
+                            onClick = { },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                            border = BorderStroke(1.dp, Color(0xFFEEF2FF)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = "✏️ Edit Profile", color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Settings Group 1
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column {
+                        ProfileSettingsRow("🔔", "Notifications", "2 reminders enabled")
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        ProfileSettingsRow("A/文", "Language", "English")
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        ProfileSettingsRow("👥", "My groups", "3 groups - 1 admin role")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Settings Group 2
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column {
+                        ProfileSettingsRow("👤", "Account settings", "Personal details & security")
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        ProfileSettingsRow("🛡️", "Privacy & data", "Your documents, your control")
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        ProfileSettingsRow("❓", "Help and Support", "Guides and contact options")
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                // Logout Button
+                Button(
+                    onClick = { onLogoutClicked() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEF2F2)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "🚪 Logout", color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // Bottom navigation
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp, horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { onHomeClicked() }
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "🏠", fontSize = 16.sp)
+                        Text(text = "Home", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Text(text = "📋", fontSize = 16.sp)
+                        Text(text = "Tasks", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { onRemindersClicked() }
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "🔔", fontSize = 16.sp)
+                        Text(text = "Reminders", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .background(Color(0xFFDBEAFE), RoundedCornerShape(16.dp))
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(text = "👤", fontSize = 16.sp)
+                        Text(text = "Profile", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileSettingsRow(icon: String, title: String, subtitle: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = icon, fontSize = 20.sp, color = Color(0xFF3B82F6))
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B)
+                )
+            }
+        }
+        Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
     }
 }
