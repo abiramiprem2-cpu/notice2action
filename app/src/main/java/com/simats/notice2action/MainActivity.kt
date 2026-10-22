@@ -155,7 +155,20 @@ class MainActivity : ComponentActivity() {
                             ProfileScreen(
                                 onHomeClicked = { currentScreen = AppScreen.MAIN },
                                 onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
-                                onLogoutClicked = { currentScreen = AppScreen.LOGIN }
+                                onLogoutClicked = { currentScreen = AppScreen.LOGIN },
+                                onSettingsClicked = { currentScreen = AppScreen.SETTINGS_PRIVACY }
+                            )
+                        }
+                        AppScreen.SETTINGS_PRIVACY -> {
+                            SettingsAndPrivacyScreen(
+                                onBackClicked = { currentScreen = AppScreen.PROFILE },
+                                onLanguageClicked = { currentScreen = AppScreen.LANGUAGE_SETTINGS },
+                                onDeleteAccountClicked = { currentScreen = AppScreen.LOGIN }
+                            )
+                        }
+                        AppScreen.LANGUAGE_SETTINGS -> {
+                            LanguageSettingsScreen(
+                                onBackClicked = { currentScreen = AppScreen.SETTINGS_PRIVACY }
                             )
                         }
                     }
@@ -166,7 +179,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS
 }
 
 @Composable
@@ -4112,7 +4125,8 @@ fun ReminderSettingsScreen(
 fun ProfileScreen(
     onHomeClicked: () -> Unit,
     onRemindersClicked: () -> Unit,
-    onLogoutClicked: () -> Unit
+    onLogoutClicked: () -> Unit,
+    onSettingsClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -4148,7 +4162,12 @@ fun ProfileScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1E293B)
                     )
-                    Text(text = "⚙️", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                    Text(
+                        text = "⚙️", 
+                        fontSize = 20.sp, 
+                        color = Color(0xFF3B82F6),
+                        modifier = Modifier.clickable { onSettingsClicked() }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -4232,7 +4251,7 @@ fun ProfileScreen(
                     shadowElevation = 2.dp
                 ) {
                     Column {
-                        ProfileSettingsRow("👤", "Account settings", "Personal details & security")
+                        ProfileSettingsRow("👤", "Account settings", "Personal details & security", onClick = { onSettingsClicked() })
                         HorizontalDivider(color = Color(0xFFF1F5F9))
                         ProfileSettingsRow("🛡️", "Privacy & data", "Your documents, your control")
                         HorizontalDivider(color = Color(0xFFF1F5F9))
@@ -4310,11 +4329,11 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileSettingsRow(icon: String, title: String, subtitle: String) {
+fun ProfileSettingsRow(icon: String, title: String, subtitle: String, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { }
+            .clickable { onClick() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -4337,5 +4356,371 @@ fun ProfileSettingsRow(icon: String, title: String, subtitle: String) {
             }
         }
         Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
+    }
+}
+
+@Composable
+fun SettingsAndPrivacyScreen(
+    onBackClicked: () -> Unit,
+    onLanguageClicked: () -> Unit = {},
+    onDeleteAccountClicked: () -> Unit = {}
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Header
+                Text(
+                    text = "H • PROFILE, SETTINGS & SUPPORT",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF334155),
+                            modifier = Modifier
+                                .clickable { onBackClicked() }
+                                .padding(end = 12.dp)
+                        )
+                        Text(
+                            text = "Settings & privacy",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Text(text = "🛡️", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Appearance
+                Text(
+                    text = "Appearance",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp))
+                        .padding(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color.White, RoundedCornerShape(6.dp))
+                            .shadow(1.dp, RoundedCornerShape(6.dp))
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Light", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3B82F6))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Dark", fontSize = 12.sp, color = Color(0xFF64748B))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "System", fontSize = 12.sp, color = Color(0xFF64748B))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Settings Group 1
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column {
+                        ProfileSettingsRow("A/文", "Language", "English", onClick = { onLanguageClicked() })
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        ProfileSettingsRow("🔔", "Default reminders", "1 day before - 9:00 AM")
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        ProfileSettingsRow("🔓", "Document privacy", "Private unless you explicitly share")
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        ProfileSettingsRow("🗄️", "Data export", "Documents and tasks - Export ZIP")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Info Banner
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFEEF2FF), RoundedCornerShape(8.dp))
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "🛡️", fontSize = 16.sp, color = Color(0xFF3B82F6))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Sharing requires recipient authorization. No data is stored or exported in this demo.",
+                        fontSize = 12.sp,
+                        color = Color(0xFF3B82F6),
+                        lineHeight = 16.sp
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Account control
+                Text(
+                    text = "Account control",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Delete Account",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Permanently remove your profile, private documents, tasks and reminders.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF64748B),
+                            lineHeight = 16.sp
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Button(
+                            onClick = { onDeleteAccountClicked() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEF2F2)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = "🗑️", fontSize = 14.sp)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = "Delete Account", color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Text(
+                            text = "Second confirmation required - See the UI board",
+                            fontSize = 10.sp,
+                            color = Color(0xFF94A3B8)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Footer buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = { },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text(text = "Terms", color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(
+                        onClick = { },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text(text = "Privacy", color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(
+                        onClick = { },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text(text = "❓ Help", color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Text(
+                    text = "Notice2Action - Version 1.0.0 - College demo",
+                    fontSize = 10.sp,
+                    color = Color(0xFF94A3B8),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun LanguageSettingsScreen(
+    onBackClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF334155),
+                            modifier = Modifier
+                                .clickable { onBackClicked() }
+                                .padding(end = 12.dp)
+                        )
+                        Text(
+                            text = "Language",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Text(text = "A/文", fontSize = 20.sp, color = Color(0xFF3B82F6))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Select your preferred language",
+                    fontSize = 14.sp,
+                    color = Color(0xFF64748B)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Language List
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column {
+                        LanguageRow("English", true)
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        LanguageRow("Spanish (Español)", false)
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        LanguageRow("French (Français)", false)
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        LanguageRow("German (Deutsch)", false)
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        LanguageRow("Chinese (中文)", false)
+                        HorizontalDivider(color = Color(0xFFF1F5F9))
+                        LanguageRow("Japanese (日本語)", false)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LanguageRow(languageName: String, isSelected: Boolean) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = languageName,
+            fontSize = 16.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = if (isSelected) Color(0xFF3B82F6) else Color(0xFF1E293B)
+        )
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .background(Color(0xFF3B82F6), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "✓", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .border(1.dp, Color(0xFFCBD5E1), CircleShape)
+            )
+        }
     }
 }
