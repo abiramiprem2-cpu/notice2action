@@ -219,7 +219,13 @@ class MainActivity : ComponentActivity() {
                             MyTasksScreen(
                                 onHomeClicked = { currentScreen = AppScreen.MAIN },
                                 onRemindersClicked = { currentScreen = AppScreen.REMINDERS },
-                                onProfileClicked = { currentScreen = AppScreen.PROFILE }
+                                onProfileClicked = { currentScreen = AppScreen.PROFILE },
+                                onTaskClicked = { currentScreen = AppScreen.TASK_DETAILS }
+                            )
+                        }
+                        AppScreen.TASK_DETAILS -> {
+                            TaskDetailsScreen(
+                                onBackClicked = { currentScreen = AppScreen.MY_TASKS }
                             )
                         }
                     }
@@ -230,7 +236,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppScreen {
-    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS, SHARE_NOTICE, MY_TASKS
+    SPLASH, ONBOARDING_1, ONBOARDING_2, LOGIN, CREATE_ACCOUNT, MAIN, SCAN_DOCUMENT, UPLOAD_DOCUMENT, DOCUMENT_PREVIEW, NOTICE_DETAILS, REVIEW_ACTIONS, UPCOMING_ACTIONS, NAVIGATION_DRAWER, REMINDERS, REMINDER_SETTINGS, PROFILE, SETTINGS_PRIVACY, LANGUAGE_SETTINGS, HELP_SUPPORT, CALENDAR, MY_DOCUMENTS, DOCUMENT_DETAILS, SHARE_NOTICE, MY_TASKS, TASK_DETAILS
 }
 
 @Composable
@@ -6790,7 +6796,8 @@ fun ShareNoticeScreen(
 fun MyTasksScreen(
     onHomeClicked: () -> Unit,
     onRemindersClicked: () -> Unit,
-    onProfileClicked: () -> Unit
+    onProfileClicked: () -> Unit,
+    onTaskClicked: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -6937,7 +6944,8 @@ fun MyTasksScreen(
                     date = "20 Oct • 5:00 PM",
                     priorityText = "High",
                     priorityBg = Color(0xFFFEE2E2),
-                    priorityTextColor = Color(0xFFEF4444)
+                    priorityTextColor = Color(0xFFEF4444),
+                    onClick = { onTaskClicked() }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -6948,7 +6956,8 @@ fun MyTasksScreen(
                     date = "22 Oct • 10:00 AM",
                     priorityText = "Medium",
                     priorityBg = Color(0xFFFEF3C7),
-                    priorityTextColor = Color(0xFFD97706)
+                    priorityTextColor = Color(0xFFD97706),
+                    onClick = { onTaskClicked() }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -6959,7 +6968,8 @@ fun MyTasksScreen(
                     date = "23 Oct • 4:00 PM",
                     priorityText = "Medium",
                     priorityBg = Color(0xFFFEF3C7),
-                    priorityTextColor = Color(0xFFD97706)
+                    priorityTextColor = Color(0xFFD97706),
+                    onClick = { onTaskClicked() }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -7099,10 +7109,13 @@ fun TaskCardItem(
     date: String,
     priorityText: String,
     priorityBg: Color,
-    priorityTextColor: Color
+    priorityTextColor: Color,
+    onClick: () -> Unit = {}
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         color = Color.White,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = 2.dp
@@ -7158,6 +7171,397 @@ fun TaskCardItem(
             }
 
             Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
+        }
+    }
+}
+
+@Composable
+fun TaskDetailsScreen(
+    onBackClicked: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF8FAFC)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Header
+                Text(
+                    text = "D • TASK CREATION & MANAGEMENT",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64748B)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF334155),
+                            modifier = Modifier
+                                .clickable { onBackClicked() }
+                                .padding(end = 12.dp)
+                        )
+                        Text(
+                            text = "Task details",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                    Text(text = "•••", fontSize = 18.sp, color = Color(0xFF3B82F6), fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Badges
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFDBEAFE), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "In progress",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2563EB)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFFEE2E2), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "High priority",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFEF4444)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Title
+                Text(
+                    text = "Submit project proposal",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Description
+                Text(
+                    text = "Upload your project abstract and team member details to the student portal for Innovation Week 2026.",
+                    fontSize = 14.sp,
+                    color = Color(0xFF64748B),
+                    lineHeight = 20.sp
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Dates & Reminders Card
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = "📅", fontSize = 20.sp)
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = "20 October 2026 • 5:00 PM",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF0F172A)
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Extracted deadline • Verified by Maya",
+                                        fontSize = 11.sp,
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFEEF2FF), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "5 days",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2563EB)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "🔔", fontSize = 20.sp)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "19 October 2026 • 9:00 AM",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Reminder selected by you",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Checklist Card
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Checklist",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+                            Text(
+                                text = "1 of 3",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2563EB)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Progress Bar
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .background(Color(0xFFF1F5F9), RoundedCornerShape(2.dp))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.33f)
+                                    .fillMaxHeight()
+                                    .background(Color(0xFF2563EB), RoundedCornerShape(2.dp))
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Checklist items
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .background(Color(0xFF2563EB), RoundedCornerShape(4.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "✓", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Draft project abstract",
+                                fontSize = 13.sp,
+                                color = Color(0xFF64748B)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .border(1.5.dp, Color(0xFFCBD5E1), RoundedCornerShape(4.dp))
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Add team member details",
+                                fontSize = 13.sp,
+                                color = Color(0xFF334155)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .border(1.5.dp, Color(0xFFCBD5E1), RoundedCornerShape(4.dp))
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Upload proposal to student portal",
+                                fontSize = 13.sp,
+                                color = Color(0xFF334155)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Source Notice Card
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(Color(0xFFEEF2FF), RoundedCornerShape(10.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "📄", fontSize = 20.sp)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Innovation Week 2026",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Original notice • PDF • Page 1",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                        }
+
+                        Text(text = "›", fontSize = 20.sp, color = Color(0xFF94A3B8))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Edit & Delete Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEF2FF)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(text = "✏️ Edit", fontSize = 13.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Button(
+                        onClick = { },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEF2F2)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(text = "🗑️ Delete", fontSize = 13.sp, color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Completion and delete confirmation concepts on the UI board.",
+                    fontSize = 10.sp,
+                    color = Color(0xFF94A3B8),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Bottom Mark as Completed Button
+            Button(
+                onClick = { onBackClicked() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "✓", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Mark as Completed",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }
